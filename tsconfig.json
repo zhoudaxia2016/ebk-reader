@@ -18,9 +18,17 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "jsx": "react-jsx"
+    "jsx": "react",
+    "noImplicitAny": false,
+    "paths": {
+      "~/*": ["./src/*"],
+      "foliate/*": ["./src/foliate-js/*"]
+    }
   },
   "include": [
     "src"
+  ],
+  "exclude": [
+    "src/foliate-js"
   ]
 }
