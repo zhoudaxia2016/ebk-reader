@@ -1,0 +1,17 @@
+{
+  "name": "ebk Reader",
+  "short_name": "ebk",
+  "id": "ebk-reader",
+  "display": "standalone",
+  "scope": "/ebk-reader/",
+  "start_url": "/ebk-reader/",
+  "theme_color": "#f7f7f7",
+  "background_color": "#edeef0",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
