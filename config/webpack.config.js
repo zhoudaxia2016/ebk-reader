@@ -318,7 +318,7 @@ module.exports = function (webpackEnv) {
           'scheduler/tracing': 'scheduler/tracing-profiling',
         }),
         ...(modules.webpackAliases || {}),
-        '~/': path.resolve('./src'),
+        '~': path.resolve('./src'),
         'foliate': path.resolve('./src/foliate-js'),
       },
       plugins: [
