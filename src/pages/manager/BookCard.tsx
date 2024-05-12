@@ -1,15 +1,23 @@
-import React, {useEffect, useState} from 'react'
+import React, {useCallback, useEffect, useState} from 'react'
 import {toDataURL} from '~/utils/fileReader'
+import {useNavigate} from 'react-router-dom'
 
-export default function BookCard({info: {author, title, cover}}) {
+export default function BookCard({info: {author, title, cover, id}}) {
   const [coverSrc, setCoverSrc] = useState('')
+  const navigate = useNavigate()
+
   useEffect(() => {
     toDataURL(cover).then((src: any) => {
       setCoverSrc(src)
     })
   }, [cover])
+
+  const handleClick = useCallback(() => {
+    navigate('/book?id=' + id)
+  }, [id])
+
   return (
-    <div className="book-card">
+    <div className="book-card" onClick={handleClick}>
       <div className="book-cover">
         {coverSrc && <img src={coverSrc}/> }
       </div>

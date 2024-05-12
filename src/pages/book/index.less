@@ -1,0 +1,35 @@
+.reader,
+.reader-wrapper {
+  height: 100%;
+}
+
+.reader-wrapper {
+  width: 80%;
+  position: relative;
+  overflow: hidden;
+  .footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: absolute;
+    bottom: 20px;
+    width: 100%;
+    height: 80px;
+    left: 0;
+  }
+  .prev {
+    margin-left: 10px;
+  }
+  .next {
+    margin-right: 10px;
+  }
+}
+
+@media screen and (max-width: 800px) {
+  .reader-wrapper {
+    width: 100%;
+    .footer {
+      bottom: 2px;
+    }
+  }
+}

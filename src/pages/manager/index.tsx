@@ -27,7 +27,7 @@ export default function Manager() {
     const cover = await book.getCover()
     const data = await toArrayBuffer(file)
     const id = await bookDataSt.add(data)
-    const info = {id, cover, ...book.metadata}
+    const info = {id, cover, name: file.name, type: file.type, ...book.metadata}
     bookInfoSt.add(info)
     loadBooks()
   }, [])

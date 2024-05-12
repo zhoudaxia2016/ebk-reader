@@ -148,21 +148,13 @@ export const getBook = async file => {
   return book
 }
 
-export const mountBook = async (book) => {
+export const mountBook = async (book, container) => {
   const view = document.createElement('foliate-view')
-  document.body.append(view)
+  container.append(view)
   await view.open(book)
-  function handleKeydown(event) {
-    const k = event.key
-    if (k === 'ArrowLeft' || k === 'h') view.goLeft()
-    else if(k === 'ArrowRight' || k === 'l') view.goRight()
-  }
-  function onLoad({ detail: { doc } }) {
-    doc.addEventListener('keydown', handleKeydown)
-  }
-  view.addEventListener('load', onLoad)
   view.renderer.setStyles?.(getCSS(style))
   view.renderer.next()
   const title = book.metadata?.title ?? 'Untitled Book'
   document.title = title
+  return view
 }
