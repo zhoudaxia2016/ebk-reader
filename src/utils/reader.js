@@ -155,6 +155,7 @@ export const mountBook = async (book, container) => {
   const view = document.createElement('foliate-view')
   container.append(view)
   await view.open(book)
+  view.renderer.setAttribute('flow', 'scrolled')
   view.renderer.setStyles?.(getCSS(style))
   view.renderer.next()
   const title = book.metadata?.title ?? 'Untitled Book'
