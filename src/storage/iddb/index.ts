@@ -1,69 +1,35 @@
-const version = 1
-const dbName = 'books'
+import Db from './Db'
 
-const openDb = (cb?): Promise<any> => {
-  return new Promise((res, rej) => {
-    const request = indexedDB.open(dbName, version)
-    request.onsuccess = (e: any) => {
-      res(e.target.result)
-    }
-    request.onupgradeneeded = function (e: any) {
-      cb?.(e)
-    }
-  })
+enum STORE {
+  bookData = 'bookData',
+  bookInfo = 'bookInfo',
 }
 
-export default class {
-  name: string
-
-  constructor(name, opts) {
-    this.name = name
-    openDb((e) => {
-      const db = e.target.result
-      if (!db.objectStoreNames.contains(name)) {
-        db.createObjectStore(name, opts)
-      }
-    })
+class EbkDb extends Db {
+  constructor() {
+    super('ebk-reader', [
+      {name: STORE.bookData, opts: {autoIncrement: true}},
+      {name: STORE.bookInfo, opts: {keyPath: 'id'}},
+    ])
   }
 
-  add(data) {
-    return new Promise(async (res) => {
-      const db = await openDb()
-      const store = db.transaction(this.name, 'readwrite').objectStore(this.name)
-      const rq = store.add(data)
-      rq.onsuccess = (e) => {
-        res(e.target.result)
-      }
-    })
+  async addBook(data, info) {
+    const id = await this.add(STORE.bookData, data)
+    info = {...info, id}
+    return this.add(STORE.bookInfo, info)
   }
 
-  // TODO 完善type
-  get(id): any {
-    return new Promise(async (res) => {
-      const db = await openDb()
-      const store = db.transaction(this.name).objectStore(this.name)
-      const rq = store.get(id)
-      rq.onsuccess = (e) => {
-        res(e.target.result)
-      }
-    })
+  getBookInfo(id) {
+    return this.get(STORE.bookInfo, id)
   }
 
-  getAll(): any {
-    return new Promise(async (res) => {
-      const db = await openDb()
-      const store = db.transaction(this.name, 'readwrite').objectStore(this.name)
-      const rq = store.openCursor()
-      const result: any = []
-      rq.onsuccess = (e) => {
-        const cursor = e.target.result
-        if (cursor) {
-          result.push(cursor.value)
-          cursor.continue()
-        } else {
-          res(result)
-        }
-      }
-    })
+  getBookData(id) {
+    return this.get(STORE.bookData, id)
+  }
+
+  getAllBooks() {
+    return this.getAll(STORE.bookInfo)
   }
 }
+
+export default new EbkDb()

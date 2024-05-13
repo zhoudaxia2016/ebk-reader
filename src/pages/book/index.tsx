@@ -1,8 +1,7 @@
 import './index.less'
 import React, {useCallback, useEffect, useRef} from 'react'
 import {useSearchParams} from 'react-router-dom'
-import bookDataSt from '~/storage/iddb/BookDataSt'
-import bookInfoSt from '~/storage/iddb/BookInfoSt'
+import iddb from '~/storage/iddb'
 import {getBook, mountBook} from '~/utils/reader'
 import {LeftOutlined, RightOutlined} from '@ant-design/icons'
 import {Button} from 'antd'
@@ -19,8 +18,8 @@ export default function Book() {
         return
       }
       const id = Number(searchParams.get('id'))
-      const data = await bookDataSt.get(id)
-      const info = await bookInfoSt.get(id)
+      const data = await iddb.getBookData(id)
+      const info = await iddb.getBookInfo(id)
       const blob = new File([data], info.name, {type: info.type})
       const book = await getBook(blob)
       refReader.current.innerText = ''

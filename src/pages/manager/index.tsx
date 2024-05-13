@@ -3,8 +3,7 @@ import React, {useCallback, useEffect, useRef, useState} from 'react'
 import {Input} from 'antd'
 import {PlusOutlined, SearchOutlined} from '@ant-design/icons'
 import {getBook} from '~/utils/reader'
-import bookDataSt from '~/storage/iddb/BookDataSt'
-import bookInfoSt from '~/storage/iddb/BookInfoSt'
+import iddb from '~/storage/iddb'
 import {toArrayBuffer} from '~/utils/fileReader'
 import BookCard from './BookCard'
 
@@ -13,7 +12,7 @@ export default function Manager() {
   const refFileInput = useRef<HTMLInputElement>(null)
 
   const loadBooks = async () => {
-    const books = await bookInfoSt.getAll()
+    const books = await iddb.getAllBooks()
     setBooks(books)
   }
 
@@ -26,9 +25,7 @@ export default function Manager() {
     const book: any = await getBook(file)
     const cover = await book.getCover()
     const data = await toArrayBuffer(file)
-    const id = await bookDataSt.add(data)
-    const info = {id, cover, name: file.name, type: file.type, ...book.metadata}
-    bookInfoSt.add(info)
+    await iddb.addBook(data, {cover, name: file.name, type: file.type, ...book.metadata})
     loadBooks()
   }, [])
 
