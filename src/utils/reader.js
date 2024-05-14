@@ -80,7 +80,7 @@ hyphens: ${hyphenate ? 'auto' : 'manual'};
 -webkit-hyphenate-limit-lines: 2;
 hanging-punctuation: allow-end last;
 widows: 2;
-font-size: 18px !important;
+font-size: 19px !important;
 line-height: 1.8 !important;
 margin-top: 0 !important;
 margin-bottom: 10px !important;
