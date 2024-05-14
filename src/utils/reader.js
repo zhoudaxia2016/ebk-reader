@@ -157,7 +157,6 @@ export const mountBook = async (book, container) => {
   await view.open(book)
   view.renderer.setAttribute('flow', 'scrolled')
   view.renderer.setStyles?.(getCSS(style))
-  view.renderer.next()
   const title = book.metadata?.title ?? 'Untitled Book'
   document.title = title
   return view
