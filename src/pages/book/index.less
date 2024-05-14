@@ -33,3 +33,42 @@
     }
   }
 }
+
+.dir-container {
+  .ant-collapse-item {
+    position: relative;
+    border-bottom-width: 0;
+    &::after {
+      content: '';
+      position: absolute;
+      width: calc(100% - 40px);
+      height: 1px;
+      left: 20px;
+      bottom: 0;
+      background: rgba(25, 25, 25, 0.1);
+      transform: scaleY(0.5);
+    }
+  }
+  .ant-collapse-expand-icon {
+    transform: scale(0.8);
+    color: rgba(25, 25, 25, 0.3);
+  }
+  .ant-drawer-body {
+    padding: 0;
+    .ant-collapse-content-box {
+      padding: 0 40px 10px !important;
+    }
+  }
+  .dir-section {
+    line-height: 40px;
+    font-size: 16px;
+  }
+  .dir-chapter {
+    font-weight: bold;
+    font-size: 18px;
+  }
+  .ant-drawer-content-wrapper {
+    max-height: 80%;
+    overflow: auto;
+  }
+}

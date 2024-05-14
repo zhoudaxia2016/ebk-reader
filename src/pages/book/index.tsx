@@ -6,6 +6,7 @@ import {getBook, mountBook} from '~/utils/reader'
 import {LeftOutlined, RightOutlined} from '@ant-design/icons'
 import {Button} from 'antd'
 import {EPUB} from '~/foliate-js/epub'
+import Dir from './Dir'
 
 const RECORD_LOCATION_KEY = 'ebk_recordLocation'
 const recordLocationJSON = localStorage.getItem(RECORD_LOCATION_KEY)
@@ -19,6 +20,7 @@ export default function Book() {
   const refBook = useRef<any>(null)
   const refView = useRef<any>(null)
   const refId = useRef<number>()
+  const [toc, setToc] = useState([])
 
   const handleRelocate = useCallback((e) => {
     const {section: {current}, fraction} = e.detail
@@ -44,6 +46,7 @@ export default function Book() {
       const view: any = await mountBook(book, refReader.current)
       refView.current = view
       setSections(book.sections)
+      setToc(book.toc)
       view.addEventListener('relocate', handleRelocate)
       view.goToFraction(fraction)
     }
@@ -64,13 +67,17 @@ export default function Book() {
   const next = useCallback(() => {
     refView.current.renderer.nextSection()
   }, [])
+  const goto = useCallback((href) => {
+    refView.current.goTo(href)
+  }, [])
 
   return (
     <div className="reader-wrapper">
       <div className="reader" ref={refReader}></div>
       <div className="footer">
         <Button className="prev" icon={<LeftOutlined/>} disabled={sectionIndex === 0} onClick={prev}></Button>
-        <Button className="next" icon={<RightOutlined/>} disabled={sectionIndex === sections.length - 1}onClick={next}></Button>
+        <Dir toc={toc} goto={goto}/>
+        <Button className="next" icon={<RightOutlined/>} disabled={sectionIndex === sections.length - 1} onClick={next}></Button>
       </div>
     </div>
   )
