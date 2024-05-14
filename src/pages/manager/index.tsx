@@ -21,11 +21,12 @@ export default function Manager() {
   }, [])
 
   const handleFileChange = useCallback(async (e) => {
-    const file = e.target.files[0]
-    const book: any = await getBook(file)
-    const cover = await book.getCover()
-    const data = await toArrayBuffer(file)
-    await iddb.addBook(data, {cover, name: file.name, type: file.type, ...book.metadata})
+    await Promise.all([...e.target.files].map(async file => {
+      const book: any = await getBook(file)
+      const cover = await book.getCover()
+      const data = await toArrayBuffer(file)
+      await iddb.addBook(data, {cover, name: file.name, type: file.type, ...book.metadata})
+    }))
     loadBooks()
   }, [])
 
@@ -36,7 +37,7 @@ export default function Manager() {
   return (
     <div className="manager">
       <div className="manager-header">
-        <input ref={refFileInput} className="file-input" type="file" accept=".epub" onChange={handleFileChange}/>
+        <input ref={refFileInput} className="file-input" multiple type="file" accept=".epub" onChange={handleFileChange}/>
         <Input className="search-input"
           prefix={<SearchOutlined/>}
           suffix={<PlusOutlined className="import-btn" onClick={handleClickImport}/>}
