@@ -34,6 +34,11 @@ export default function Manager() {
     loadBooks()
   }, [])
 
+  const handleDelete = useCallback(async (id) => {
+    await iddb.deleteBook(id)
+    loadBooks()
+  }, [])
+
   return (
     <div className="manager">
       <div className="manager-header">
@@ -45,7 +50,7 @@ export default function Manager() {
       </div>
       <div className="manager-books-wrapper">
         <div className="manager-books">
-          {books.map((book) => (<BookCard key={book.id} info={book}/>))}
+          {books.map((book) => (<BookCard key={book.id} info={book} onDelete={handleDelete}/>))}
         </div>
       </div>
     </div>

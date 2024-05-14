@@ -30,6 +30,11 @@ class EbkDb extends Db {
   getAllBooks() {
     return this.getAll(STORE.bookInfo)
   }
+
+  deleteBook(id) {
+    this.delete(STORE.bookData, id)
+    this.delete(STORE.bookInfo, id)
+  }
 }
 
 export default new EbkDb()

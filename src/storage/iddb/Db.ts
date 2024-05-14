@@ -70,6 +70,18 @@ abstract class Db {
       })
     })
   }
+
+  delete(storeName, key) {
+    return new Promise(async (res) => {
+      this.connection.then(db => {
+        const store = db.transaction(storeName, 'readwrite').objectStore(storeName)
+        const rq = store.delete(key)
+        rq.onsuccess = (e) => {
+          res(e.target.result)
+        }
+      })
+    })
+  }
 }
 
 export default Db
