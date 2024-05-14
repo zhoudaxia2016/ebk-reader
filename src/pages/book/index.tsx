@@ -46,7 +46,6 @@ export default function Book() {
       setSections(book.sections)
       view.addEventListener('relocate', handleRelocate)
       view.goToFraction(fraction)
-      console.log('zz_debug', book)
     }
     loadBook()
     return () => {
@@ -60,10 +59,10 @@ export default function Book() {
   }, [])
 
   const prev = useCallback(() => {
-    refView.current.prev()
+    refView.current.renderer.prevSection()
   }, [])
   const next = useCallback(() => {
-    refView.current.next()
+    refView.current.renderer.nextSection()
   }, [])
 
   return (
