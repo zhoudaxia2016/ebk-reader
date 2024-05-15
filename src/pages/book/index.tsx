@@ -7,10 +7,7 @@ import {Button} from 'antd'
 import {EPUB} from '~/foliate-js/epub'
 import Dir from './Dir'
 import Hammer from 'hammerjs'
-
-const RECORD_LOCATION_KEY = 'ebk_recordLocation'
-const recordLocationJSON = localStorage.getItem(RECORD_LOCATION_KEY)
-const recordLocation: Record<string, number> = recordLocationJSON ? JSON.parse(recordLocationJSON) : {}
+import Storage from '~/storage/localStorage'
 
 interface IProps {
   searchParams: any,
@@ -29,6 +26,7 @@ export default class Book extends React.Component<IProps, IState> {
   private book
   private id: number
   private hammer: Hammer
+  private bookUserInfo: Storage
   public state: IState = {
     sections: [],
     sectionIndex: 0,
@@ -42,8 +40,9 @@ export default class Book extends React.Component<IProps, IState> {
     }
     const {searchParams} = this.props
     const id = Number(searchParams.get('id'))
+    this.bookUserInfo = new Storage('book-userinfo', id)
     this.id = id
-    const fraction = recordLocation?.[id] || 0
+    const fraction = this.bookUserInfo.get('fraction') || 0
     const data = await iddb.getBookData(id)
     const info = await iddb.getBookInfo(id)
     const blob = new File([data], info.name, {type: info.type})
@@ -65,13 +64,12 @@ export default class Book extends React.Component<IProps, IState> {
     this.state.view?.removeEventListener('relocate', this.handleRelocate)
     this.state.view?.removeEventListener('load', this.handleLoad)
     this.state.view?.renderer.destroy()
+    this.bookUserInfo?.set('accessTime', Date.now())
   }
 
   private handleRelocate = (e) => {
     const {fraction} = e.detail
-    const id = this.id
-    recordLocation[id] = fraction
-    localStorage.setItem(RECORD_LOCATION_KEY, JSON.stringify(recordLocation))
+    this.bookUserInfo.set('fraction', fraction)
   }
 
   private handleTap = () => {

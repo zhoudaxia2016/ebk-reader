@@ -6,13 +6,20 @@ import {getBook} from '~/utils/reader'
 import iddb from '~/storage/iddb'
 import {toArrayBuffer} from '~/utils/fileReader'
 import BookCard from './BookCard'
+import Storage from '~/storage/localStorage'
 
 export default function Manager() {
   const [books, setBooks] = useState<any[]>([])
   const refFileInput = useRef<HTMLInputElement>(null)
+  const refBookUserInfo = useRef<any>()
 
   const loadBooks = async () => {
     const books = await iddb.getAllBooks()
+    books.sort((a, b) => {
+      const atime = refBookUserInfo.current.get(a.id)?.accessTime || 0
+      const btime = refBookUserInfo.current.get(b.id)?.accessTime || 0
+      return btime - atime
+    })
     setBooks(books)
   }
 
@@ -31,6 +38,7 @@ export default function Manager() {
   }, [])
 
   useEffect(() => {
+    refBookUserInfo.current = new Storage('book-userinfo')
     loadBooks()
   }, [])
 
