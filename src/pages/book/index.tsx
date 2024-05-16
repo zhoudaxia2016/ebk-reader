@@ -3,11 +3,12 @@ import React from 'react'
 import iddb from '~/storage/iddb'
 import {getBook, mountBook} from '~/utils/reader'
 import {LeftOutlined, RightOutlined} from '@ant-design/icons'
-import {Button} from 'antd'
+import {Button, Progress} from 'antd'
 import {EPUB} from '~/foliate-js/epub'
 import Dir from './Dir'
 import Hammer from 'hammerjs'
 import Storage from '~/storage/localStorage'
+import color from '~/config/color'
 
 interface IProps {
   searchParams: any,
@@ -19,6 +20,7 @@ interface IState {
   view?: any,
   toc: any[],
   showFooter: boolean,
+  fraction: number,
 }
 
 export default class Book extends React.Component<IProps, IState> {
@@ -32,6 +34,7 @@ export default class Book extends React.Component<IProps, IState> {
     sectionIndex: 0,
     toc: [],
     showFooter: true,
+    fraction: 0,
   }
 
   async componentDidMount() {
@@ -53,7 +56,8 @@ export default class Book extends React.Component<IProps, IState> {
     this.setState({
       sections: book.sections,
       toc: book.toc,
-      view
+      view,
+      fraction,
     })
     view.goToFraction(fraction)
     view.addEventListener('relocate', this.handleRelocate)
@@ -70,6 +74,7 @@ export default class Book extends React.Component<IProps, IState> {
   private handleRelocate = (e) => {
     const {fraction} = e.detail
     this.bookUserInfo.set('fraction', fraction)
+    this.setState({fraction})
   }
 
   private handleTap = () => {
@@ -107,16 +112,17 @@ export default class Book extends React.Component<IProps, IState> {
   }
 
   render() {
-    const {showFooter, sectionIndex, sections, toc} = this.state
+    const {showFooter, sectionIndex, sections, toc, fraction} = this.state
     return (
       <div className="reader-wrapper">
         <div className="reader" ref={this.refReader}></div>
         {
           showFooter &&
           <div className="footer">
-            <Button className="prev" icon={<LeftOutlined/>} disabled={sectionIndex === 0} onClick={this.prev}></Button>
+            <Button className="prev" type="text" icon={<LeftOutlined/>} disabled={sectionIndex === 0} onClick={this.prev}></Button>
             <Dir toc={toc} goto={this.goto}/>
-            <Button className="next" icon={<RightOutlined/>} disabled={sectionIndex === sections.length - 1} onClick={this.next}></Button>
+            <Progress className="reader-progress" percent={Math.round(fraction * 100)} strokeColor={color.pr2} />
+            <Button className="next" type="text" icon={<RightOutlined/>} disabled={sectionIndex === sections.length - 1} onClick={this.next}></Button>
           </div>
         }
       </div>

@@ -1,4 +1,5 @@
 import React, {useCallback, useMemo, useState} from 'react'
+import {UnorderedListOutlined} from '@ant-design/icons'
 import {Button, Collapse, Drawer} from 'antd'
 
 export default function Dir({toc, goto}) {
@@ -25,7 +26,7 @@ export default function Dir({toc, goto}) {
   }, [])
   return (
     <>
-      <Button className="dir-btn" onClick={handleOpen}>目录</Button>
+      <Button className="dir-btn" type="text" icon={<UnorderedListOutlined/>} onClick={handleOpen}></Button>
       <Drawer rootClassName="dir-container" title="目录" open={open} placement="bottom" height="auto" onClose={handleClose}>
         <Collapse bordered={false} items={items} collapsible="icon"/>
       </Drawer>
