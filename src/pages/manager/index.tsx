@@ -16,8 +16,8 @@ export default function Manager() {
   const loadBooks = async () => {
     const books = await iddb.getAllBooks()
     books.sort((a, b) => {
-      const atime = refBookUserInfo.current.get(a.id)?.accessTime || 0
-      const btime = refBookUserInfo.current.get(b.id)?.accessTime || 0
+      const atime = refBookUserInfo.current.get(a.id)?.accessTime || a.createTime
+      const btime = refBookUserInfo.current.get(b.id)?.accessTime || b.createTime
       return btime - atime
     })
     setBooks(books)
@@ -32,7 +32,8 @@ export default function Manager() {
       const book: any = await getBook(file)
       const cover = await book.getCover()
       const data = await toArrayBuffer(file)
-      await iddb.addBook(data, {cover, name: file.name, type: file.type, ...book.metadata})
+      const createTime = Date.now()
+      await iddb.addBook(data, {createTime, cover, name: file.name, type: file.type, ...book.metadata})
     }))
     loadBooks()
   }, [])
