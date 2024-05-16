@@ -9,6 +9,9 @@ export default function Dir({toc, goto}) {
     setOpen(false)
   }
   const items = useMemo(() => {
+    if (!toc) {
+      return null
+    }
     return toc.map(s => ({
       label: <div className="dir-chapter" onClick={() => handleClick(s.href)}>{s.label}</div>,
       key: s.id,
