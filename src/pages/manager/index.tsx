@@ -37,7 +37,6 @@ export default function Manager() {
   const handleFileChange = useCallback(async (e) => {
     const md5Set = new Set(books.map(_ => _.md5))
     const duplicateFiles = []
-    console.log('zz_debug', md5Set, books)
     await Promise.all([...e.target.files].map(async file => {
       const book: any = await getBook(file)
       const data = await toArrayBuffer(file)
