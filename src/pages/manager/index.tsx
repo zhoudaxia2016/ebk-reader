@@ -51,7 +51,7 @@ export default function Manager() {
   return (
     <div className="manager">
       <div className="manager-header">
-        <input ref={refFileInput} className="file-input" multiple type="file" accept=".epub" onChange={handleFileChange}/>
+        <input ref={refFileInput} className="file-input" multiple type="file" accept=".epub,.mobi,.azw3,fb2,cbz" onChange={handleFileChange}/>
         <Input className="search-input"
           prefix={<SearchOutlined/>}
           suffix={<PlusOutlined className="import-btn" onClick={handleClickImport}/>}

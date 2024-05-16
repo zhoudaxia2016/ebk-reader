@@ -130,7 +130,6 @@ export const getBook = async file => {
     } else {
       const { EPUB } = await import('foliate/epub.js')
       book = await new EPUB(loader).init()
-      console.log('zz_debug', book)
     }
   }
   else if (await isPDF(file)) {
