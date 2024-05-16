@@ -71,7 +71,7 @@ a:link {
 color: lightblue;
 }
 }
-a, p, li, blockquote, dd {
+a, p, li, blockquote, dd, div {
 text-align: ${justify ? 'justify' : 'start'};
 -webkit-hyphens: ${hyphenate ? 'auto' : 'manual'};
 hyphens: ${hyphenate ? 'auto' : 'manual'};
