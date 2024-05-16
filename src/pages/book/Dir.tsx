@@ -26,7 +26,7 @@ export default function Dir({toc, goto}) {
   }, [])
   return (
     <>
-      <Button className="dir-btn" type="text" icon={<UnorderedListOutlined/>} onClick={handleOpen}></Button>
+      <Button className="dir-btn" type="text" size="large" icon={<UnorderedListOutlined/>} onClick={handleOpen}></Button>
       <Drawer rootClassName="dir-container" title="目录" open={open} placement="bottom" height="auto" onClose={handleClose}>
         <Collapse bordered={false} items={items} collapsible="icon"/>
       </Drawer>

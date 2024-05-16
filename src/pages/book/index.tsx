@@ -119,10 +119,10 @@ export default class Book extends React.Component<IProps, IState> {
         {
           showFooter &&
           <div className="footer">
-            <Button className="prev" type="text" icon={<LeftOutlined/>} disabled={sectionIndex === 0} onClick={this.prev}></Button>
+            <Button className="prev" type="text" size="large" icon={<LeftOutlined/>} disabled={sectionIndex === 0} onClick={this.prev}></Button>
             <Dir toc={toc} goto={this.goto}/>
             <Progress className="reader-progress" percent={Math.round(fraction * 100)} strokeColor={color.pr2} />
-            <Button className="next" type="text" icon={<RightOutlined/>} disabled={sectionIndex === sections.length - 1} onClick={this.next}></Button>
+            <Button className="next" type="text" size="large" icon={<RightOutlined/>} disabled={sectionIndex === sections.length - 1} onClick={this.next}></Button>
           </div>
         }
       </div>
