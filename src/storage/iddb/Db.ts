@@ -61,7 +61,7 @@ abstract class Db {
         rq.onsuccess = (e) => {
           const cursor = e.target.result
           if (cursor) {
-            result.push(cursor.value)
+            result.push([cursor.key, cursor.value])
             cursor.continue()
           } else {
             res(result)

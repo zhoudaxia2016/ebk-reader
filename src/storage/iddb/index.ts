@@ -27,8 +27,12 @@ class EbkDb extends Db {
     return this.get(STORE.bookData, id)
   }
 
-  getAllBooks() {
+  getAllBookInfo() {
     return this.getAll(STORE.bookInfo)
+  }
+
+  getAllBookData() {
+    return this.getAll(STORE.bookData)
   }
 
   deleteBook(id) {

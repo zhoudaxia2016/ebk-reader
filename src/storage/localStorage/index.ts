@@ -21,10 +21,20 @@ export default class Storage {
   public set(key, value) {
     const json = localStorage.getItem(this.prefix)
     const allData = json ? JSON.parse(json) : {}
-    const data = allData[this.id] || {}
-    data[key] = value
-    allData[this.id] = data
+    if (this.id) {
+      const data = allData[this.id] || {}
+      data[key] = value
+      allData[this.id] = data
+    } else {
+      allData[key] = value
+    }
     localStorage.setItem(this.prefix, JSON.stringify(allData))
+  }
+
+  public getAll() {
+    const json = localStorage.getItem(this.prefix)
+    const allData = json ? JSON.parse(json) : {}
+    return allData
   }
 }
 

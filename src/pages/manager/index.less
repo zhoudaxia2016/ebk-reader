@@ -13,16 +13,25 @@
 }
 
 .search-input {
-  padding: 0 20px;
   width: 600px;
   height: 50px;
-  box-shadow: none !important;
-  border: none !important;
-  border-radius: 25px;
-  font-size: 18px;
+  .ant-input-affix-wrapper,
+  .ant-input-wrapper {
+    height: 100%;
+  }
+  .ant-input-affix-wrapper {
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 25px;
+    font-size: 18px;
+  }
   .import-btn {
     cursor: pointer;
-    color: var(--pr1);
+  }
+  .ant-input-group-addon {
+    border-radius: 25px;
+    border: none !important;
+    background: #fff;
   }
 }
 
@@ -38,7 +47,9 @@
   .search-input {
     height: 40px;
     width: 100%;
-    font-size: 16px;
+    .ant-input-affix-wrapper {
+      font-size: 16px;
+    }
   }
 }
 
