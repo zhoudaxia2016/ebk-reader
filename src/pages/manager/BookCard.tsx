@@ -1,14 +1,12 @@
 import React, {useCallback, useEffect, useState} from 'react'
 import {toDataURL} from '~/utils/fileReader'
-import {useNavigate} from 'react-router-dom'
 import {Button, Dropdown, Modal} from 'antd'
 import formatDate from '~/utils/formatDate'
+import {CheckCircleFilled} from '@ant-design/icons'
 
-
-export default function BookCard({info: {author, title, cover, id, published = '', publisher, createTime, description, type, language = []}, onDelete}) {
+export default function BookCard({info: {author, title, cover, id, published = '', publisher, createTime, description, type, language = []}, onDelete, onSelect, selected, onClick}) {
   const [modal, contextHolder] = Modal.useModal()
   const [coverSrc, setCoverSrc] = useState('')
-  const navigate = useNavigate()
 
   useEffect(() => {
     toDataURL(cover).then((src: any) => {
@@ -38,14 +36,19 @@ export default function BookCard({info: {author, title, cover, id, published = '
     })
   }, [id, modal, title, published, publisher, createTime, description, type, language])
 
+  const handleSelect = useCallback(() => {
+    onSelect(id, !selected)
+  }, [id, selected, onSelect])
+
   const items = [
     {label: <Button type="text" onClick={handleDelete}>删除</Button>, key: 1},
     {label: <Button type="text" onClick={handleDetail}>详情</Button>, key: 2},
+    {label: <Button type="text" onClick={handleSelect}>选择</Button>, key: 3},
   ]
 
   const handleClick = useCallback(() => {
-    navigate('/book?id=' + id)
-  }, [id])
+    onClick(id, selected)
+  }, [id, selected, onClick])
 
   return (
     <>
@@ -59,6 +62,7 @@ export default function BookCard({info: {author, title, cover, id, published = '
             <div className="book-title">{title}</div>
             <div className="book-author">{author[0].name}</div>
           </div>
+          {selected && <CheckCircleFilled className="check-btn"/>}
         </div>
       </Dropdown>
     </>

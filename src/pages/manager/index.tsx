@@ -1,19 +1,22 @@
 import './index.less'
 import React, {useCallback, useEffect, useRef, useState} from 'react'
-import {Input, notification} from 'antd'
+import {Button, Input, notification} from 'antd'
 import {PlusOutlined, SearchOutlined, VerticalAlignBottomOutlined, EllipsisOutlined} from '@ant-design/icons'
 import iddb from '~/storage/iddb'
 import BookCard from './BookCard'
 import Storage from '~/storage/localStorage'
 import MoreMenu from './MoreMenu'
 import {saveBooks} from './utils'
+import {useNavigate} from 'react-router-dom'
 
-export default function Manager() {
+function Manager() {
   const [books, setBooks] = useState<any[]>([])
   const [notice, contextHolder] = notification.useNotification()
+  const [selectedBooks, setSelectBooks] = useState({})
   const refFileInput = useRef<HTMLInputElement>(null)
   const refBookUserInfo = useRef<any>()
   const refMd5Set = useRef(new Set())
+  const navigate = useNavigate()
 
   const loadBooks = async () => {
     const books = (await iddb.getAllBookInfo()).map(_ => _[1])
@@ -71,10 +74,33 @@ export default function Manager() {
     return refBookUserInfo.current
   }, [])
 
+  const handleSelect = useCallback((id, selected) => {
+    selectedBooks[id] = selected
+    setSelectBooks({...selectedBooks})
+  }, [selectedBooks])
+
+  const showOperation = Object.values(selectedBooks).some(_ => _)
+  const handleClickBook = useCallback((id, selected) => {
+    if (showOperation) {
+      handleSelect(id, !selected)
+      return
+    }
+    navigate('/book?id=' + id)
+  }, [showOperation, handleSelect])
+
+  const handleHeaderClick = useCallback(() => {
+    setSelectBooks({})
+  }, [])
+
+  const handleBatchDelete = () => {
+    Object.keys(selectedBooks).forEach(id => handleDelete(Number(id)))
+    setSelectBooks({})
+  }
+
   return (
     <div className="manager">
       {contextHolder}
-      <div className="manager-header">
+      <div className="manager-header" onClick={handleHeaderClick}>
         <input ref={refFileInput} className="file-input" multiple type="file" accept=".epub,.mobi,.azw3,fb2,cbz" onChange={handleFileChange}/>
         <Input className="search-input"
           prefix={<SearchOutlined/>}
@@ -83,10 +109,22 @@ export default function Manager() {
         />
       </div>
       <div className="manager-books-wrapper">
+        {
+          showOperation &&
+          <div className="manager-operations">
+            <Button type="text" onClick={handleBatchDelete}>删除</Button>
+          </div>
+        }
         <div className="manager-books">
-          {books.map((book) => (<BookCard key={book.id} info={book} onDelete={handleDelete}/>))}
+          {books.map((book) => (
+            <BookCard key={book.id} selected={selectedBooks[book.id]} info={book}
+              onDelete={handleDelete} onSelect={handleSelect} onClick={handleClickBook}
+              />
+          ))}
         </div>
       </div>
     </div>
   )
 }
+
+export default React.memo(Manager)
