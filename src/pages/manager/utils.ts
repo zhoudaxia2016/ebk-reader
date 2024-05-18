@@ -16,7 +16,8 @@ export function parseFileName(name) {
   return {}
 }
 
-export const saveBooks = async (files, md5Set, isBuffer = false) => {
+export const saveBooks = async (files, md5Set, isBuffer) => {
+  isBuffer = isBuffer === undefined ? false : isBuffer
   const result = await Promise.all(files.map(async file => {
     let data
     if (isBuffer) {
