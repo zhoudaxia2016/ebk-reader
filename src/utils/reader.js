@@ -97,6 +97,10 @@ div:has(> img) {
 [align="center"] { text-align: center; }
 [align="justify"] { text-align: justify; }
 
+h1, h2, h3, h4, h5, h6 {
+  text-indent: 0;
+}
+
 pre {
 white-space: pre-wrap !important;
 }
