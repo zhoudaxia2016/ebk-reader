@@ -86,6 +86,11 @@ margin-top: 0 !important;
 margin-bottom: 10px !important;
 color: #212832 !important;
 }
+
+p:has(> img),
+div:has(> img) {
+  overflow-x: auto;
+}
 /* prevent the above from overriding the align attribute */
 [align="left"] { text-align: left; }
 [align="right"] { text-align: right; }
