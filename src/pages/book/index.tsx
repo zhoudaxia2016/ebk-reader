@@ -29,6 +29,8 @@ export default class Book extends React.Component<IProps, IState> {
   private id: number
   private hammer: Hammer
   private bookUserInfo: Storage
+  private startTouch: any
+  private touchStartTime: number
   public state: IState = {
     sections: [],
     sectionIndex: 0,
@@ -90,13 +92,48 @@ export default class Book extends React.Component<IProps, IState> {
     }
   }
 
+  private isPrevDisabled() {
+    const {sectionIndex} = this.state
+    return sectionIndex === 0
+  }
+
+  private isNextDisabled() {
+    const {sectionIndex, sections} = this.state
+    return sectionIndex === sections.length - 1
+  }
+
+  private handleTouchStart = (e) => {
+    this.startTouch = e.changedTouches[0]
+    this.touchStartTime = e.timeStamp
+  }
+  private handleTouchEnd = (e) => {
+    if (e.timeStamp - this.touchStartTime > 200) {
+      return
+    }
+    const start = this.startTouch
+    const end = e.changedTouches[0]
+    const hr = end.screenX - start.screenX
+    const vr = end.screenY - start.screenY
+    if (Math.abs(hr) > Math.abs(vr) && Math.abs(hr) > 90) {
+      if (hr < 0 && !this.isNextDisabled()) {
+        this.next()
+      }
+      if (hr > 0 && !this.isPrevDisabled()) {
+        this.prev()
+      }
+    }
+  }
+
   private handleLoad = (e) => {
+    const doc = e.detail.doc
     this.hammer?.off('tap', this.handleTap)
     this.hammer?.off('doubletap', this.handleDoubleTap)
-    this.hammer = new Hammer(e.detail.doc)
+    this.hammer = new Hammer(doc)
     this.hammer.on('tap', this.handleTap)
     this.hammer.on('doubletap', this.handleDoubleTap)
     this.setState({sectionIndex: e.detail.index})
+    doc.addEventListener('touchstart', this.handleTouchStart)
+    doc.addEventListener('touchend', this.handleTouchEnd)
   }
 
   private prev = () => {
@@ -119,10 +156,10 @@ export default class Book extends React.Component<IProps, IState> {
         {
           showFooter &&
           <div className="footer">
-            <Button className="prev" type="text" size="large" icon={<LeftOutlined/>} disabled={sectionIndex === 0} onClick={this.prev}></Button>
+            <Button className="prev" type="text" size="large" icon={<LeftOutlined/>} disabled={this.isPrevDisabled()} onClick={this.prev}></Button>
             <Dir toc={toc} goto={this.goto} title={this.book?.metadata.title}/>
             <Progress className="reader-progress" percent={Math.round(fraction * 100)} strokeColor={color.pr2} />
-            <Button className="next" type="text" size="large" icon={<RightOutlined/>} disabled={sectionIndex === sections.length - 1} onClick={this.next}></Button>
+            <Button className="next" type="text" size="large" icon={<RightOutlined/>} disabled={this.isNextDisabled()} onClick={this.next}></Button>
           </div>
         }
       </div>
