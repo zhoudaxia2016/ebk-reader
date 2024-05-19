@@ -3,15 +3,13 @@ import {toDataURL} from '~/utils/fileReader'
 import {Button, Dropdown, Modal} from 'antd'
 import formatDate from '~/utils/formatDate'
 import {CheckCircleFilled} from '@ant-design/icons'
+import ShelfForm from './ShelfForm'
 
-export default function BookCard({info: {author, title, cover, id, published = '', publisher, createTime, description, type, language = []}, onDelete, onSelect, selected, onClick}) {
+export default function BookCard({info: {author, title, cover, id, published = '', publisher, createTime, description, type, language = []}, onDelete, onSelect, selected, onClick, shelfs, onPutShelf}) {
   const [modal, contextHolder] = Modal.useModal()
   const [coverSrc, setCoverSrc] = useState('')
 
   useEffect(() => {
-    if (!cover) {
-      return
-    }
     toDataURL(cover).then((src: any) => {
       setCoverSrc(src)
     })
@@ -27,7 +25,7 @@ export default function BookCard({info: {author, title, cover, id, published = '
       footer: null,
       content: (
         <div className="book-detail">
-          <div>{author.map(_ => _.name || _).join(' ')}</div>
+          <div>{author.map(_ => _.name).join(' ')}</div>
           <div>创建时间：{formatDate(createTime)}</div>
           <div>文件类型：{type}</div>
           <div>语言：{Array.isArray(language) ? language.join(' ') : language}</div>
@@ -47,6 +45,7 @@ export default function BookCard({info: {author, title, cover, id, published = '
     {label: <Button type="text" onClick={handleDelete}>删除</Button>, key: 1},
     {label: <Button type="text" onClick={handleDetail}>详情</Button>, key: 2},
     {label: <Button type="text" onClick={handleSelect}>选择</Button>, key: 3},
+    {label: <ShelfForm bookId={id} shelfs={shelfs} onFinish={onPutShelf}/>, key: 4},
   ]
 
   const handleClick = useCallback(() => {
@@ -63,7 +62,7 @@ export default function BookCard({info: {author, title, cover, id, published = '
           </div>
           <div className="book-info">
             <div className="book-title">{title}</div>
-            <div className="book-author">{author?.[0].name}</div>
+            <div className="book-author">{author[0].name}</div>
           </div>
           {selected && <CheckCircleFilled className="check-btn"/>}
         </div>
