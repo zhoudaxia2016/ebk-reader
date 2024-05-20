@@ -64,6 +64,9 @@ export default class Book extends React.Component<IProps, IState> {
     view.goToFraction(fraction)
     view.addEventListener('relocate', this.handleRelocate)
     view.addEventListener('load', this.handleLoad)
+    if (info.isManga) {
+      view.renderer.setAttribute('gap', 0)
+    }
   }
 
   componentWillUnmount() {

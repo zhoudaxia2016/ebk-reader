@@ -28,16 +28,24 @@ export const saveBooks = async (files, md5Set, isBuffer?) => {
       data = await toArrayBuffer(file)
     }
     const book: any = await getBook(file)
+    const isManga = standardDeviation(book.sections.map(_ => _.size)) < 5
     const md5 = getMd5(data)
     if (md5Set.has(md5)) {
       return {name: file.name, isSuccess: false}
     }
     const cover = await book.getCover()
     const createTime = Date.now()
-    const id = await iddb.addBook(data, {createTime, cover, name: file.name, type: file.type, md5, ...book.metadata})
+    const id = await iddb.addBook(data, {isManga, createTime, cover, name: file.name, type: file.type, md5, ...book.metadata})
     return {name: file.name, id, isSuccess: true}
   }))
   const successFiles = result.filter(_ => _.isSuccess)
   const failFiles = result.filter(_ => !_.isSuccess)
   return {successFiles, failFiles}
+}
+
+export function standardDeviation(arr) {
+  const n = arr.length;
+  const mean = arr.reduce((a, b) => a + b) / n
+  const variance = arr.reduce((a, b) => a + (b - mean) ** 2, 0) / n
+  return Math.sqrt(variance)
 }
