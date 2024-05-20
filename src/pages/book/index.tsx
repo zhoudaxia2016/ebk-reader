@@ -126,6 +126,11 @@ export default class Book extends React.Component<IProps, IState> {
 
   private handleLoad = (e) => {
     const doc = e.detail.doc
+    if (/^\s+$/.test(doc.body.innerText)) {
+      this.state.view.renderer.setAttribute('gap', 0)
+    } else {
+      this.state.view.renderer.setAttribute('gap', 6)
+    }
     this.hammer?.off('tap', this.handleTap)
     this.hammer?.off('doubletap', this.handleDoubleTap)
     this.hammer = new Hammer(doc)
