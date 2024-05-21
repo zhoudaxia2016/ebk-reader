@@ -26,16 +26,15 @@ export default function Backup({getBookUserInfo}) {
     const bookUserInfo = getBookUserInfo()
     const config = bookUserInfo.getAll()
     zip.file(backupConfig, JSON.stringify(config))
-    zip.generateAsync({type: 'uint8array'}, function(metadata) {
+    zip.generateAsync({type: 'blob'}, function(metadata) {
       refProgress.current.updatePercent(metadata.percent)
     }).then(function(content) {
       refProgress.current.close()
       const fileStream = streamSaver.createWriteStream(backupZip, {
-        size: content.byteLength,
+        size: content.size,
       })
-      const writer = fileStream.getWriter()
-      writer.write(content)
-      writer.close()
+      const readableStream = content.stream()
+      readableStream.pipeTo(fileStream)
     })
   }, [])
 
