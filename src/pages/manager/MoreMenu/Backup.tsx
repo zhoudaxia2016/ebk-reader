@@ -1,16 +1,16 @@
-import {Button, Modal, Progress} from 'antd'
-import React, {useCallback, useState} from 'react'
+import {Button} from 'antd'
+import React, {useCallback, useRef} from 'react'
 import {backupZip, backupBookFolder, backupConfig} from './config'
 import iddb from '~/storage/iddb'
 import JSZip from 'jszip'
 import {parseFileName} from '../utils'
 import streamSaver from 'streamsaver'
+import ProgressModal from '~/components/ProgressModal'
 
 export default function Backup({getBookUserInfo}) {
-  const [percent, setPercent] = useState(0)
-  const [showProgress, setShowProgress] = useState(false)
+  const refProgress = useRef<ProgressModal>()
   const handleBackup = useCallback(async () => {
-    setShowProgress(true)
+    refProgress.current.open()
     const books = await iddb.getAllBookData()
     const booksInfo = await iddb.getAllBookInfo()
     const zip = new JSZip()
@@ -27,10 +27,9 @@ export default function Backup({getBookUserInfo}) {
     const config = bookUserInfo.getAll()
     zip.file(backupConfig, JSON.stringify(config))
     zip.generateAsync({type: 'uint8array'}, function(metadata) {
-      setPercent(Math.round(metadata.percent))
+      refProgress.current.updatePercent(metadata.percent)
     }).then(function(content) {
-      setPercent(0)
-      setShowProgress(false)
+      refProgress.current.close()
       const fileStream = streamSaver.createWriteStream(backupZip, {
         size: content.byteLength,
       })
@@ -39,16 +38,10 @@ export default function Backup({getBookUserInfo}) {
       writer.close()
     })
   }, [])
-  const handleCancel = useCallback(() => {
-    setShowProgress(false)
-    setPercent(0)
-  }, [])
 
   return (
     <>
-      <Modal open={showProgress} title="正在生成备份..." footer={null} maskClosable={false} onCancel={handleCancel}>
-        <Progress className="backup-progress" percent={percent}/>
-      </Modal>
+      <ProgressModal title="正在生成备份..." ref={refProgress}/>
       <Button type="text" onClick={handleBackup}>备份</Button>
     </>
   )
