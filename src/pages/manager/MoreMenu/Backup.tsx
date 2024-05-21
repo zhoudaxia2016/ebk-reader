@@ -4,7 +4,7 @@ import {backupZip, backupBookFolder, backupConfig} from './config'
 import iddb from '~/storage/iddb'
 import JSZip from 'jszip'
 import {parseFileName} from '../utils'
-import {saveAs} from 'file-saver'
+import streamSaver from 'streamsaver'
 
 export default function Backup({getBookUserInfo}) {
   const [percent, setPercent] = useState(0)
@@ -26,12 +26,17 @@ export default function Backup({getBookUserInfo}) {
     const bookUserInfo = getBookUserInfo()
     const config = bookUserInfo.getAll()
     zip.file(backupConfig, JSON.stringify(config))
-    zip.generateAsync({type: 'blob'}, function(metadata) {
+    zip.generateAsync({type: 'uint8array'}, function(metadata) {
       setPercent(Math.round(metadata.percent))
     }).then(function(content) {
       setPercent(0)
       setShowProgress(false)
-      saveAs(content, backupZip)
+      const fileStream = streamSaver.createWriteStream(backupZip, {
+        size: content.byteLength,
+      })
+      const writer = fileStream.getWriter()
+      writer.write(content)
+      writer.close()
     })
   }, [])
   const handleCancel = useCallback(() => {

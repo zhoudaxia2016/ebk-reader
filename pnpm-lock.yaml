@@ -95,9 +95,6 @@ dependencies:
   file-loader:
     specifier: ^6.2.0
     version: 6.2.0(webpack@5.91.0)
-  file-saver:
-    specifier: ^2.0.5
-    version: 2.0.5
   fs-extra:
     specifier: ^10.0.0
     version: 10.1.0
@@ -179,6 +176,9 @@ dependencies:
   source-map-loader:
     specifier: ^3.0.0
     version: 3.0.2(webpack@5.91.0)
+  streamsaver:
+    specifier: ^2.0.6
+    version: 2.0.6
   style-loader:
     specifier: ^3.3.1
     version: 3.3.4(webpack@5.91.0)
@@ -5720,10 +5720,6 @@ packages:
       webpack: 5.91.0
     dev: false
 
-  /file-saver@2.0.5:
-    resolution: {integrity: sha512-P9bmyZ3h/PRG+Nzga+rbdI4OEpNDzAVyy74uVO9ATgzLK6VtAsYybF/+TOCvrc0MO793d6+42lLyZTw7/ArVzA==}
-    dev: false
-
   /filelist@1.0.4:
     resolution: {integrity: sha512-w1cEuf3S+DrLCQL7ET6kz+gmlJdbq9J7yXCSjK/OZCPA+qEN1WyF4ZAf0YYJa4/shHJra2t/d/r8SV4Ji+x+8Q==}
     dependencies:
@@ -10507,6 +10503,10 @@ packages:
     engines: {node: '>= 0.4'}
     dependencies:
       internal-slot: 1.0.7
+    dev: false
+
+  /streamsaver@2.0.6:
+    resolution: {integrity: sha512-LK4e7TfCV8HzuM0PKXuVUfKyCB1FtT9L0EGxsFk5Up8njj0bXK8pJM9+Wq2Nya7/jslmCQwRK39LFm55h7NBTw==}
     dev: false
 
   /string-convert@0.2.1:
