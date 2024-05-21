@@ -3,8 +3,10 @@ import {Button} from 'antd'
 import {backupBookFolder, backupConfig} from './config'
 import {parseFileName, saveBooks} from '../utils'
 import {loadAsync} from 'jszip'
+import ProgressModal from '~/components/ProgressModal'
 
 export default function Backup({notice, getMd5Set, getBookUserInfo, onComplete}) {
+  const refProgress = useRef<ProgressModal>()
   const handleRestoreInputChange = useCallback(async (e) => {
     const file = e.target.files[0]
     const {files, config} = await loadAsync(file).then(async res => {
@@ -18,7 +20,9 @@ export default function Backup({notice, getMd5Set, getBookUserInfo, onComplete})
       const config = await res.files[backupConfig].async('string')
       return {files: result, config: JSON.parse(config)}
     })
-    const {successFiles, failFiles} = await saveBooks(files, getMd5Set(), true)
+    refProgress.current.open()
+    const {successFiles, failFiles} = await saveBooks({files, md5Set: getMd5Set(), isBuffer: true, onProgress: (p) => refProgress.current.updatePercent(p)})
+    refProgress.current.close()
     successFiles.forEach((file) => {
       const {name = ''} = parseFileName(file.name)
       if (!name) {
@@ -51,6 +55,7 @@ export default function Backup({notice, getMd5Set, getBookUserInfo, onComplete})
   const refRestoreInput = useRef(null)
   return (
     <>
+      <ProgressModal ref={refProgress} title="正在从备份导入..."/>
       <Button type="text" onClick={handleRestore}>导入</Button>
       <input ref={refRestoreInput} className="file-input" type="file" accept=".zip" onChange={handleRestoreInputChange}/>
     </>

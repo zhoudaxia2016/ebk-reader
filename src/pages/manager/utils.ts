@@ -16,8 +16,10 @@ export function parseFileName(name) {
   return {}
 }
 
-export const saveBooks = async (files, md5Set, isBuffer?) => {
+export const saveBooks = async ({files, md5Set, isBuffer, onProgress}: {files: any[], md5Set: Set<string>, isBuffer?, onProgress?: (n: number) => void}) => {
   isBuffer = isBuffer === undefined ? false : isBuffer
+  const total = files.length
+  let finishCount = 0
   const result = await Promise.all(files.map(async file => {
     let data
     if (isBuffer) {
@@ -35,6 +37,8 @@ export const saveBooks = async (files, md5Set, isBuffer?) => {
     const cover = await book.getCover()
     const createTime = Date.now()
     const id = await iddb.addBook(data, {createTime, cover, name: file.name, type: file.type, md5, ...book.metadata})
+    finishCount++
+    onProgress?.(100 * finishCount / total)
     return {name: file.name, id, isSuccess: true}
   }))
   const successFiles = result.filter(_ => _.isSuccess)

@@ -1,13 +1,14 @@
 import './index.less'
 import React, {useCallback, useEffect, useRef, useState} from 'react'
 import {Button, Input, notification} from 'antd'
-import {PlusOutlined, SearchOutlined, VerticalAlignBottomOutlined, EllipsisOutlined} from '@ant-design/icons'
+import {PlusOutlined, SearchOutlined} from '@ant-design/icons'
 import iddb from '~/storage/iddb'
 import BookCard from './BookCard'
 import Storage from '~/storage/localStorage'
 import MoreMenu from './MoreMenu'
 import {saveBooks} from './utils'
 import {useNavigate} from 'react-router-dom'
+import ProgressModal from '~/components/ProgressModal'
 
 function Manager() {
   const [books, setBooks] = useState<any[]>([])
@@ -15,8 +16,9 @@ function Manager() {
   const [selectedBooks, setSelectBooks] = useState({})
   const refFileInput = useRef<HTMLInputElement>(null)
   const refBookUserInfo = useRef<any>()
-  const refMd5Set = useRef(new Set())
+  const refMd5Set = useRef(new Set<string>())
   const navigate = useNavigate()
+  const refProgress = useRef<ProgressModal>()
 
   const loadBooks = async () => {
     const books = (await iddb.getAllBookInfo()).map(_ => _[1])
@@ -34,7 +36,9 @@ function Manager() {
   }, [])
 
   const handleFileChange = useCallback(async (e) => {
-    const {failFiles} = await saveBooks([...e.target.files], refMd5Set.current)
+    refProgress.current.open()
+    const {failFiles} = await saveBooks({files: [...e.target.files], md5Set: refMd5Set.current, onProgress: (p) => refProgress.current.updatePercent(p)})
+    refProgress.current.close()
     const bookNum = e.target.files.length
     const failNum = failFiles.length
     if (failFiles.length > 0) {
@@ -100,6 +104,7 @@ function Manager() {
   return (
     <div className="manager">
       {contextHolder}
+      <ProgressModal ref={refProgress} title="正在导入..."/>
       <div className="manager-header" onClick={handleHeaderClick}>
         <input ref={refFileInput} className="file-input" multiple type="file" accept=".epub,.mobi,.azw3,fb2,cbz" onChange={handleFileChange}/>
         <Input className="search-input"
