@@ -110,6 +110,12 @@ aside[epub|type~="note"],
 aside[epub|type~="rearnote"] {
 display: none;
 }
+
+img {
+  position: unset;
+  height: fit-content;
+  width: 100%;
+}
 `
 
 const style = {
