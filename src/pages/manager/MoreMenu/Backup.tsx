@@ -6,6 +6,7 @@ import JSZip from 'jszip'
 import {parseFileName} from '../utils'
 import streamSaver from 'streamsaver'
 import ProgressModal from '~/components/ProgressModal'
+import {isMobile} from '~/utils/userAgent'
 
 export default function Backup({getBookUserInfo}) {
   const refProgress = useRef<ProgressModal>()
@@ -26,6 +27,21 @@ export default function Backup({getBookUserInfo}) {
     const bookUserInfo = getBookUserInfo()
     const config = bookUserInfo.getAll()
     zip.file(backupConfig, JSON.stringify(config))
+    const writeStream = streamSaver.createWriteStream(backupZip).getWriter()
+    if (isMobile) {
+      zip.generateInternalStream({type: 'uint8array'})
+        .on('data', (data, metadata) => {
+          refProgress.current.updatePercent(metadata.percent)
+          writeStream.write(data)
+        })
+        .on('error', err => console.error(err))
+        .on('end', () => {
+          writeStream.close()
+          refProgress.current.close()
+        })
+        .resume()
+      return
+    }
     zip.generateAsync({type: 'blob'}, function(metadata) {
       refProgress.current.updatePercent(metadata.percent)
     }).then(function(content) {
