@@ -95,6 +95,9 @@ dependencies:
   file-loader:
     specifier: ^6.2.0
     version: 6.2.0(webpack@5.91.0)
+  file-saver:
+    specifier: ^2.0.5
+    version: 2.0.5
   fs-extra:
     specifier: ^10.0.0
     version: 10.1.0
@@ -5718,6 +5721,10 @@ packages:
       loader-utils: 2.0.4
       schema-utils: 3.3.0
       webpack: 5.91.0
+    dev: false
+
+  /file-saver@2.0.5:
+    resolution: {integrity: sha512-P9bmyZ3h/PRG+Nzga+rbdI4OEpNDzAVyy74uVO9ATgzLK6VtAsYybF/+TOCvrc0MO793d6+42lLyZTw7/ArVzA==}
     dev: false
 
   /filelist@1.0.4:

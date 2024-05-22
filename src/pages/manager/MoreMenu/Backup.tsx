@@ -7,6 +7,7 @@ import {parseFileName} from '../utils'
 import streamSaver from 'streamsaver'
 import ProgressModal from '~/components/ProgressModal'
 import {isMobile} from '~/utils/userAgent'
+import {saveAs} from 'file-saver'
 
 export default function Backup({getBookUserInfo}) {
   const refProgress = useRef<ProgressModal>()
@@ -46,11 +47,7 @@ export default function Backup({getBookUserInfo}) {
       refProgress.current.updatePercent(metadata.percent)
     }).then(function(content) {
       refProgress.current.close()
-      const fileStream = streamSaver.createWriteStream(backupZip, {
-        size: content.size,
-      })
-      const readableStream = content.stream()
-      readableStream.pipeTo(fileStream)
+      saveAs(content, backupZip)
     })
   }, [])
 
