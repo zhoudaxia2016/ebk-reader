@@ -18,3 +18,13 @@ export function toDataURL(file) {
   })
 }
 
+export function toText(file): Promise<string> {
+  return new Promise((res) => {
+    var fileReader = new FileReader()
+    fileReader.onload = function(event: any) {
+      res(event.target.result)
+    };
+    fileReader.readAsText(file)
+  })
+}
+

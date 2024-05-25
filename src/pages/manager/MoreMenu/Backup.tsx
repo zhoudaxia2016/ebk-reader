@@ -7,6 +7,21 @@ import {parseFileName} from '../utils'
 import ProgressModal from '~/components/ProgressModal'
 import {saveAs} from 'file-saver'
 
+export function getExportConfig(bookUserInfo, booksInfo) {
+  console.log('zz_debug', bookUserInfo, booksInfo)
+  const config = Object.keys(bookUserInfo).map(id => {
+    const info = booksInfo.find(_ => _[0] === Number(id))
+    if (!info) {
+      return
+    }
+    return {
+      md5: info[1].md5,
+      config: bookUserInfo[id]
+    }
+  }).filter(_ => _)
+  return JSON.stringify(config)
+}
+
 export default function Backup({getBookUserInfo}) {
   const refProgress = useRef<ProgressModal>()
   const handleBackup = useCallback(async () => {
@@ -25,17 +40,8 @@ export default function Backup({getBookUserInfo}) {
     })
     const bookUserInfo = getBookUserInfo()
     const bookUserInfoConfig = bookUserInfo.getAll()
-    const config = Object.keys(bookUserInfoConfig).map(id => {
-      const info = booksInfo.find(_ => _[0] === Number(id))
-      if (!info) {
-        return
-      }
-      return {
-        md5: info[1].md5,
-        config: bookUserInfoConfig[id]
-      }
-    }).filter(_ => _)
-    zip.file(backupConfig, JSON.stringify(config))
+    const config = getExportConfig(bookUserInfoConfig, booksInfo)
+    zip.file(backupConfig, config)
     zip.generateAsync({type: 'blob'}, function(metadata) {
       refProgress.current.updatePercent(metadata.percent)
     }).then(function(content) {
