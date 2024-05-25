@@ -13,7 +13,7 @@ import ProgressModal from '~/components/ProgressModal'
 function Manager() {
   const [books, setBooks] = useState<any[]>([])
   const [notice, contextHolder] = notification.useNotification()
-  const [selectedBooks, setSelectBooks] = useState({})
+  const [selectedBooks, setSelectBooks] = useState<Record<string, any>>({})
   const refFileInput = useRef<HTMLInputElement>(null)
   const refBookUserInfo = useRef<any>()
   const refMd5Set = useRef(new Set<string>())
@@ -126,6 +126,11 @@ function Manager() {
     return books.filter(b => b.name.includes(searchVal))
   }, [books, searchVal])
 
+  const handleSelectAll = useCallback(() => {
+    books.forEach(b => selectedBooks[b.id] = true)
+    setSelectBooks({...selectedBooks})
+  }, [books, selectedBooks])
+
   return (
     <div className="manager">
       {contextHolder}
@@ -148,7 +153,7 @@ function Manager() {
         <div className="manager-books">
           {filterBooks.map((book) => (
             <BookCard key={book.id} selected={selectedBooks[book.id]} info={book}
-              onDelete={handleDelete} onSelect={handleSelect} onClick={handleClickBook}
+              onDelete={handleDelete} onSelect={handleSelect} onClick={handleClickBook} onSelectAll={handleSelectAll}
               />
           ))}
         </div>

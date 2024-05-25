@@ -4,7 +4,16 @@ import {Button, Dropdown, Modal} from 'antd'
 import formatDate from '~/utils/formatDate'
 import {CheckCircleFilled} from '@ant-design/icons'
 
-export default function BookCard({info: {author, title, cover, id, published = '', publisher, createTime, description, type, language = []}, onDelete, onSelect, selected, onClick}) {
+interface IProps {
+  info: any,
+  onDelete: (id) => void,
+  onSelect: (id, selected: boolean) => void,
+  selected: boolean,
+  onClick: (id, selected: boolean) => void,
+  onSelectAll: () => void,
+}
+
+export default function BookCard({info: {author, title, cover, id, published = '', publisher, createTime, description, type, language = []}, onDelete, onSelect, selected, onClick, onSelectAll}: IProps) {
   const [modal, contextHolder] = Modal.useModal()
   const [coverSrc, setCoverSrc] = useState('')
 
@@ -43,10 +52,15 @@ export default function BookCard({info: {author, title, cover, id, published = '
     onSelect(id, !selected)
   }, [id, selected, onSelect])
 
+  const handleSelectAll = useCallback(() => {
+    onSelectAll()
+  }, [onSelectAll])
+
   const items = [
     {label: <Button type="text" onClick={handleDelete}>删除</Button>, key: 1},
     {label: <Button type="text" onClick={handleDetail}>详情</Button>, key: 2},
     {label: <Button type="text" onClick={handleSelect}>选择</Button>, key: 3},
+    {label: <Button type="text" onClick={handleSelectAll}>全选</Button>, key: 4},
   ]
 
   const handleClick = useCallback(() => {
