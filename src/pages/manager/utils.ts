@@ -20,6 +20,7 @@ export const saveBooks = async ({files, md5Set, isBuffer, onProgress}: {files: a
   isBuffer = isBuffer === undefined ? false : isBuffer
   const total = files.length
   let finishCount = 0
+  md5Set = new Set(md5Set)
   const result = await Promise.all(files.map(async file => {
     let data
     if (isBuffer) {
@@ -34,12 +35,13 @@ export const saveBooks = async ({files, md5Set, isBuffer, onProgress}: {files: a
     if (md5Set.has(md5)) {
       return {name: file.name, isSuccess: false}
     }
+    md5Set.add(md5)
     const cover = await book.getCover()
     const createTime = Date.now()
     const id = await iddb.addBook(data, {createTime, cover, name: file.name, type: file.type, md5, ...book.metadata})
     finishCount++
     onProgress?.(100 * finishCount / total)
-    return {name: file.name, id, isSuccess: true}
+    return {name: file.name, id, isSuccess: true, md5}
   }))
   const successFiles = result.filter(_ => _.isSuccess)
   const failFiles = result.filter(_ => !_.isSuccess)

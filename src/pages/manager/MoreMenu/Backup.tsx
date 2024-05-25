@@ -1,12 +1,10 @@
 import {Button} from 'antd'
 import React, {useCallback, useRef} from 'react'
-import {backupZip, backupBookFolder, backupConfig} from './config'
+import {backupZip, backupConfig} from './config'
 import iddb from '~/storage/iddb'
 import JSZip from 'jszip'
 import {parseFileName} from '../utils'
-import streamSaver from 'streamsaver'
 import ProgressModal from '~/components/ProgressModal'
-import {isMobile} from '~/utils/userAgent'
 import {saveAs} from 'file-saver'
 
 export default function Backup({getBookUserInfo}) {
@@ -18,31 +16,26 @@ export default function Backup({getBookUserInfo}) {
     const zip = new JSZip()
     books.forEach(([id, data]) => {
       const info = booksInfo.find(_ => _[0] === id)
-      const {ext = ''} = parseFileName(info[1].name)
+      const {name} = info[1]
+      const {ext = ''} = parseFileName(name)
       if (!ext) {
         return
       }
-      const bookFolder = zip.folder(backupBookFolder)
-      bookFolder.file(`${id}.${ext}`, data)
+      zip.file(`${name}.${ext}`, data)
     })
     const bookUserInfo = getBookUserInfo()
-    const config = bookUserInfo.getAll()
+    const bookUserInfoConfig = bookUserInfo.getAll()
+    const config = Object.keys(bookUserInfoConfig).map(id => {
+      const info = booksInfo.find(_ => _[0] === Number(id))
+      if (!info) {
+        return
+      }
+      return {
+        md5: info[1].md5,
+        config: bookUserInfoConfig[id]
+      }
+    }).filter(_ => _)
     zip.file(backupConfig, JSON.stringify(config))
-    const writeStream = streamSaver.createWriteStream(backupZip).getWriter()
-    if (isMobile) {
-      zip.generateInternalStream({type: 'uint8array'})
-        .on('data', (data, metadata) => {
-          refProgress.current.updatePercent(metadata.percent)
-          writeStream.write(data)
-        })
-        .on('error', err => console.error(err))
-        .on('end', () => {
-          writeStream.close()
-          refProgress.current.close()
-        })
-        .resume()
-      return
-    }
     zip.generateAsync({type: 'blob'}, function(metadata) {
       refProgress.current.updatePercent(metadata.percent)
     }).then(function(content) {

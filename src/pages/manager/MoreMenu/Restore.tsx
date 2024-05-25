@@ -1,7 +1,7 @@
 import React, {useCallback, useRef} from 'react'
 import {Button} from 'antd'
-import {backupBookFolder, backupConfig} from './config'
-import {parseFileName, saveBooks} from '../utils'
+import {backupConfig} from './config'
+import {saveBooks} from '../utils'
 import {loadAsync} from 'jszip'
 import ProgressModal from '~/components/ProgressModal'
 
@@ -9,27 +9,26 @@ export default function Backup({notice, getMd5Set, getBookUserInfo, onComplete})
   const refProgress = useRef<ProgressModal>()
   const handleRestoreInputChange = useCallback(async (e) => {
     const file = e.target.files[0]
-    const {files, config} = await loadAsync(file).then(async res => {
+    const {files, allConfig} = await loadAsync(file).then(async res => {
       const files = []
-      res.folder(backupBookFolder).forEach((name, data) => files.push([name, data]))
+      res.forEach((name, data) => !/json$/.test(name) && files.push([name, data]))
       const result = await Promise.all(files.map(async ([name, data]) => {
         return data.async('arraybuffer').then(async data => {
           return {name, data}
         })
       }))
       const config = await res.files[backupConfig].async('string')
-      return {files: result, config: JSON.parse(config)}
+      return {files: result, allConfig: JSON.parse(config)}
     })
     refProgress.current.open()
     const {successFiles, failFiles} = await saveBooks({files, md5Set: getMd5Set(), isBuffer: true, onProgress: (p) => refProgress.current.updatePercent(p)})
     refProgress.current.close()
-    successFiles.forEach((file) => {
-      const {name = ''} = parseFileName(file.name)
-      if (!name) {
-        return
+    const bookUserInfo = getBookUserInfo()
+    successFiles.forEach(({id, md5}) => {
+      const config = allConfig.find(_ => _.md5 === md5)
+      if (config) {
+        bookUserInfo.set(id, config.config)
       }
-      const bookUserInfo = getBookUserInfo()
-      bookUserInfo.set(file.id, config[name])
     })
     const bookNum = files.length
     const failNum = failFiles.length
