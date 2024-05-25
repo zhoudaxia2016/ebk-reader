@@ -1,5 +1,5 @@
 import './index.less'
-import React, {useCallback, useEffect, useRef, useState} from 'react'
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react'
 import {Button, Input, notification} from 'antd'
 import {PlusOutlined, SearchOutlined} from '@ant-design/icons'
 import iddb from '~/storage/iddb'
@@ -19,6 +19,8 @@ function Manager() {
   const refMd5Set = useRef(new Set<string>())
   const navigate = useNavigate()
   const refProgress = useRef<ProgressModal>()
+  const [searchVal, setSearchVal] = useState('')
+  const [isComp, setIsComp] = useState(false)
 
   const loadBooks = async () => {
     const books = (await iddb.getAllBookInfo()).map(_ => _[1])
@@ -101,6 +103,29 @@ function Manager() {
     setSelectBooks({})
   }
 
+  const handleSearch = useCallback((e) => {
+    if (isComp) {
+      return
+    }
+    setSearchVal(e.target.value)
+  }, [isComp])
+
+  const handleCompositionStart = useCallback((e) => {
+    setIsComp(true)
+  }, [])
+
+  const handleCompositionEnd = useCallback((e) => {
+    setIsComp(false)
+    setSearchVal(e.target.value)
+  }, [])
+
+  const filterBooks = useMemo(() => {
+    if (!searchVal) {
+      return books
+    }
+    return books.filter(b => b.name.includes(searchVal))
+  }, [books, searchVal])
+
   return (
     <div className="manager">
       {contextHolder}
@@ -108,7 +133,7 @@ function Manager() {
       <div className="manager-header" onClick={handleHeaderClick}>
         <input ref={refFileInput} className="file-input" multiple type="file" accept=".epub,.mobi,.azw3,fb2,cbz" onChange={handleFileChange}/>
         <Input className="search-input"
-          prefix={<SearchOutlined/>}
+          prefix={<SearchOutlined/>} onChange={handleSearch} onCompositionEnd={handleCompositionEnd} onCompositionStart={handleCompositionStart}
           addonAfter={<MoreMenu onRestoreComplete={handleRestoreComplete} getMd5Set={getMd5Set} getBookUserInfo={getBookUserInfo}/>}
           suffix={<PlusOutlined className="import-btn" onClick={handleClickImport}/>}
         />
@@ -121,7 +146,7 @@ function Manager() {
           </div>
         }
         <div className="manager-books">
-          {books.map((book) => (
+          {filterBooks.map((book) => (
             <BookCard key={book.id} selected={selectedBooks[book.id]} info={book}
               onDelete={handleDelete} onSelect={handleSelect} onClick={handleClickBook}
               />
