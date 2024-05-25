@@ -18,6 +18,10 @@ export default function BackupConfig({getBookUserInfo, onComplete}) {
     config.forEach(({md5, config}) => {
       const info = booksInfo.find(_ => _[1].md5 === md5)
       if (info) {
+        const oldUserInfo = bookUserInfo.get(info[0])
+        if (oldUserInfo && oldUserInfo.accessTime > config.accessTime) {
+          return
+        }
         bookUserInfo.set(info[0], config)
       }
     })
