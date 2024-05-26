@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/ebk-reader/static/css/main.a35b0983.css",
-    "main.js": "/ebk-reader/static/js/main.c813d8d8.js",
+    "main.js": "/ebk-reader/static/js/main.4354299c.js",
     "static/js/985.940a25ce.chunk.js": "/ebk-reader/static/js/985.940a25ce.chunk.js",
     "static/js/525.f14c7c18.chunk.js": "/ebk-reader/static/js/525.f14c7c18.chunk.js",
     "static/js/418.8d31102b.chunk.js": "/ebk-reader/static/js/418.8d31102b.chunk.js",
@@ -15,7 +15,7 @@
     "static/js/966.bfd7c451.chunk.js": "/ebk-reader/static/js/966.bfd7c451.chunk.js",
     "index.html": "/ebk-reader/index.html",
     "main.a35b0983.css.map": "/ebk-reader/static/css/main.a35b0983.css.map",
-    "main.c813d8d8.js.map": "/ebk-reader/static/js/main.c813d8d8.js.map",
+    "main.4354299c.js.map": "/ebk-reader/static/js/main.4354299c.js.map",
     "985.940a25ce.chunk.js.map": "/ebk-reader/static/js/985.940a25ce.chunk.js.map",
     "525.f14c7c18.chunk.js.map": "/ebk-reader/static/js/525.f14c7c18.chunk.js.map",
     "418.8d31102b.chunk.js.map": "/ebk-reader/static/js/418.8d31102b.chunk.js.map",
@@ -30,6 +30,6 @@
   },
   "entrypoints": [
     "static/css/main.a35b0983.css",
-    "static/js/main.c813d8d8.js"
+    "static/js/main.4354299c.js"
   ]
 }
