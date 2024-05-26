@@ -2,7 +2,7 @@ import './index.less'
 import React from 'react'
 import iddb from '~/storage/iddb'
 import {getBook, mountBook} from '~/utils/reader'
-import {LeftOutlined, RightOutlined} from '@ant-design/icons'
+import {LeftOutlined, RightOutlined, HomeOutlined} from '@ant-design/icons'
 import {Button, Progress} from 'antd'
 import {EPUB} from '~/foliate-js/epub'
 import Dir from './Dir'
@@ -22,7 +22,7 @@ interface IState {
   sectionIndex: number,
   view?: any,
   toc: any[],
-  showFooter: boolean,
+  fullReader: boolean,
   fraction: number,
 }
 
@@ -38,7 +38,7 @@ export default class Book extends React.Component<IProps, IState> {
     sections: [],
     sectionIndex: 0,
     toc: [],
-    showFooter: true,
+    fullReader: false,
     fraction: 0,
   }
 
@@ -120,8 +120,8 @@ export default class Book extends React.Component<IProps, IState> {
   }
 
   private handleTap = () => {
-    const {showFooter} = this.state
-    this.setState({showFooter: !showFooter})
+    const {fullReader} = this.state
+    this.setState({fullReader: !fullReader})
   }
 
   private handleDoubleTap = () => {
@@ -193,13 +193,24 @@ export default class Book extends React.Component<IProps, IState> {
     this.state.view?.goTo(href)
   }
 
+  private handleBackHome = () => {
+    const {navigate} = this.props
+    navigate('/')
+  }
+
   render() {
-    const {showFooter, sectionIndex, sections, toc, fraction} = this.state
+    const {fullReader, toc, fraction} = this.state
     return (
       <div className="reader-wrapper">
         <div className="reader" ref={this.refReader}></div>
         {
-          showFooter &&
+          !fullReader &&
+          <div className="header">
+            <Button type="text" icon={<HomeOutlined/>} onClick={this.handleBackHome}></Button>
+          </div>
+        }
+        {
+          !fullReader &&
           <div className="footer">
             <Button className="prev" type="text" size="large" icon={<LeftOutlined/>} disabled={this.isPrevDisabled()} onClick={this.prev}></Button>
             <Dir toc={toc} goto={this.goto} title={this.book?.metadata.title}/>

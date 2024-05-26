@@ -7,13 +7,21 @@
   width: 80%;
   position: relative;
   overflow: hidden;
+  .header,
   .footer {
     display: flex;
     justify-content: space-between;
     align-items: center;
     position: absolute;
-    bottom: 0;
     width: 100%;
+  }
+  .header {
+    top: 0;
+    padding: 0 10px;
+    height: 48px;
+  }
+  .footer {
+    bottom: 0;
     height: 80px;
     left: 0;
     background: var(--bg1);
