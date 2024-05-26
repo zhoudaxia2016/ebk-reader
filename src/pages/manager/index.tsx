@@ -100,7 +100,7 @@ function Manager() {
   }, [])
 
   const handleBatchDelete = () => {
-    Object.keys(selectedBooks).forEach(id => handleDelete(Number(id)))
+    Object.keys(selectedBooks).forEach(id => selectedBooks[id] && handleDelete(Number(id)))
     setSelectBooks({})
   }
 
