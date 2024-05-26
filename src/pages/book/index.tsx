@@ -56,11 +56,15 @@ export default class Book extends React.Component<IProps, IState> {
           const md5 = getMd5(data)
           const booksInfo = await iddb.getAllBookInfo()
           const result = booksInfo.find(_ => _[1].md5 === md5)
-          if (!result) {
-            await saveBooks({files: [file], md5Set: new Set()})
+          let id
+          if (result) {
+            id = result[0]
+          } else {
+            const {successFiles} = await saveBooks({files: [file], md5Set: new Set()})
+            id = successFiles[0].id
           }
-          navigate('/book?id=' + result[0])
-          return res(result[0])
+          navigate('/book?id=' + id)
+          res(id)
         })
       } else {
         res()
@@ -74,7 +78,7 @@ export default class Book extends React.Component<IProps, IState> {
     }
     const {searchParams} = this.props
     let id: number | void = Number(searchParams.get('id'))
-    if (!id && "launchQueue" in window) {
+    if (!id) {
       id = await this.handleLaunchWithFile()
     }
     if (!id) {
