@@ -6,9 +6,10 @@ import iddb from '~/storage/iddb'
 import BookCard from './BookCard'
 import Storage from '~/storage/localStorage'
 import MoreMenu from './MoreMenu'
-import {saveBooks} from './utils'
+import {saveBooks, getMd5} from './utils'
 import {useNavigate} from 'react-router-dom'
 import ProgressModal from '~/components/ProgressModal'
+import {toArrayBuffer} from '~/utils/fileReader'
 
 function Manager() {
   const [books, setBooks] = useState<any[]>([])

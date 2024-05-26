@@ -3,7 +3,7 @@ import {getBook} from '~/utils/reader'
 import CryptoJS from 'crypto-js'
 import iddb from '~/storage/iddb'
 
-function getMd5(data) {
+export function getMd5(data) {
   const hash = CryptoJS.MD5(CryptoJS.lib.WordArray.create(data))
   return hash.toString(CryptoJS.enc.Hex)
 }

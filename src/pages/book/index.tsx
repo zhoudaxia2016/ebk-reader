@@ -9,9 +9,12 @@ import Dir from './Dir'
 import Hammer from 'hammerjs'
 import Storage from '~/storage/localStorage'
 import color from '~/config/color'
+import {toArrayBuffer} from '~/utils/fileReader'
+import {getMd5, saveBooks} from '../manager/utils'
 
 interface IProps {
   searchParams: any,
+  navigate: any,
 }
 
 interface IState {
@@ -39,12 +42,45 @@ export default class Book extends React.Component<IProps, IState> {
     fraction: 0,
   }
 
+  private handleLaunchWithFile(): Promise<number | void> {
+    const {navigate} = this.props
+    return new Promise((res) => {
+      if ("launchQueue" in window) {
+        // @ts-ignore
+        window.launchQueue.setConsumer(async (launchParams) => {
+          const file = await launchParams.files[0]?.getFile()
+          if (!file) {
+            return res()
+          }
+          const data = await toArrayBuffer(file)
+          const md5 = getMd5(data)
+          const booksInfo = await iddb.getAllBookInfo()
+          const result = booksInfo.find(_ => _[1].md5 === md5)
+          if (!result) {
+            await saveBooks({files: [file], md5Set: new Set()})
+          }
+          navigate('/book?id=' + result[0])
+          return res(result[0])
+        })
+      } else {
+        res()
+      }
+    })
+  }
+
   async componentDidMount() {
     if (!this.refReader.current) {
       return
     }
     const {searchParams} = this.props
-    const id = Number(searchParams.get('id'))
+    let id: number | void = Number(searchParams.get('id'))
+    if (!id && "launchQueue" in window) {
+      id = await this.handleLaunchWithFile()
+    }
+    if (!id) {
+      alert('id 不存在')
+      return
+    }
     this.bookUserInfo = new Storage('book-userinfo', id)
     this.id = id
     const fraction = this.bookUserInfo.get('fraction') || 0
