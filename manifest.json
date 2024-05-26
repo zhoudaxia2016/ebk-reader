@@ -13,5 +13,13 @@
       "sizes": "512x512",
       "type": "image/png"
     }
+  ],
+  "file_handlers": [
+    {
+      "action": "/ebk-reader/",
+      "accept": {
+        "application/epub": [".epub"]
+      }
+    }
   ]
 }
