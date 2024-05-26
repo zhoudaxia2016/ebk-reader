@@ -16,9 +16,9 @@
   ],
   "file_handlers": [
     {
-      "action": "/ebk-reader/",
+      "action": "/ebk-reader/book",
       "accept": {
-        "application/epub": [".epub"]
+        "application/*": [".epub", ".mobi"]
       }
     }
   ]
