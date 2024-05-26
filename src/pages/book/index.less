@@ -9,18 +9,23 @@
   overflow: hidden;
   .header,
   .footer {
+    position: absolute;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    top: 0;
+    padding: 0 40px;
+    height: 48px;
+    background: var(--bg2);
+  }
+  .footer {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    position: absolute;
-    width: 100%;
-  }
-  .header {
-    top: 0;
-    padding: 0 10px;
-    height: 48px;
-  }
-  .footer {
     bottom: 0;
     height: 80px;
     left: 0;
@@ -31,6 +36,18 @@
   }
   .next {
     margin-right: 10px;
+  }
+  .back-home-btn {
+    position: absolute;
+    left: 5px;
+  }
+  .book-title {
+    font-weight: bold;
+    font-size: 20px;
+    max-width: 100%;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
   }
 }
 

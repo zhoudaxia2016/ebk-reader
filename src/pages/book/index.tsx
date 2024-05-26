@@ -199,21 +199,23 @@ export default class Book extends React.Component<IProps, IState> {
   }
 
   render() {
-    const {fullReader, toc, fraction} = this.state
+    const {fullReader, toc, fraction, sectionIndex} = this.state
+    const title = this.book?.metadata.title
     return (
       <div className="reader-wrapper">
         <div className="reader" ref={this.refReader}></div>
         {
           !fullReader &&
           <div className="header">
-            <Button type="text" icon={<HomeOutlined/>} onClick={this.handleBackHome}></Button>
+            <Button className="back-home-btn" type="text" icon={<HomeOutlined/>} onClick={this.handleBackHome}></Button>
+            <div className="book-title">{title}</div>
           </div>
         }
         {
           !fullReader &&
           <div className="footer">
             <Button className="prev" type="text" size="large" icon={<LeftOutlined/>} disabled={this.isPrevDisabled()} onClick={this.prev}></Button>
-            <Dir toc={toc} goto={this.goto} title={this.book?.metadata.title}/>
+            <Dir toc={toc} goto={this.goto} title={title} sectionIndex={sectionIndex}/>
             <Progress className="reader-progress" percent={Math.round(fraction * 100)} strokeColor={color.pr2} />
             <Button className="next" type="text" size="large" icon={<RightOutlined/>} disabled={this.isNextDisabled()} onClick={this.next}></Button>
           </div>
