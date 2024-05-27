@@ -1,33 +1,33 @@
 import './index.less'
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react'
-import {Button, Input, notification} from 'antd'
-import {PlusOutlined, SearchOutlined} from '@ant-design/icons'
+import {Button, Input, notification, Segmented, Dropdown} from 'antd'
+import {PlusOutlined, SearchOutlined, EllipsisOutlined} from '@ant-design/icons'
 import iddb from '~/storage/iddb'
 import BookCard from './BookCard'
-import Storage from '~/storage/localStorage'
+import {shelfStorage, bookUserInfoStorage} from '~/storage/localStorage'
 import MoreMenu from './MoreMenu'
-import {saveBooks, getMd5} from './utils'
+import {saveBooks} from './utils'
 import {useNavigate} from 'react-router-dom'
 import ProgressModal from '~/components/ProgressModal'
-import {toArrayBuffer} from '~/utils/fileReader'
 
 function Manager() {
   const [books, setBooks] = useState<any[]>([])
   const [notice, contextHolder] = notification.useNotification()
   const [selectedBooks, setSelectBooks] = useState<Record<string, any>>({})
   const refFileInput = useRef<HTMLInputElement>(null)
-  const refBookUserInfo = useRef<any>()
   const refMd5Set = useRef(new Set<string>())
   const navigate = useNavigate()
   const refProgress = useRef<ProgressModal>()
   const [searchVal, setSearchVal] = useState('')
   const [isComp, setIsComp] = useState(false)
+  const [shelfs, setShelfs] = useState(shelfStorage.getAll())
+  const [shelf, setShelf] = useState('')
 
   const loadBooks = async () => {
     const books = (await iddb.getAllBookInfo()).map(_ => _[1])
     books.sort((a, b) => {
-      const atime = refBookUserInfo.current.get(a.id)?.accessTime || a.createTime
-      const btime = refBookUserInfo.current.get(b.id)?.accessTime || b.createTime
+      const atime = bookUserInfoStorage.get(a.id)?.accessTime || a.createTime
+      const btime = bookUserInfoStorage.get(b.id)?.accessTime || b.createTime
       return btime - atime
     })
     setBooks(books)
@@ -60,7 +60,6 @@ function Manager() {
   }, [books, notice])
 
   useEffect(() => {
-    refBookUserInfo.current = new Storage('book-userinfo')
     loadBooks()
   }, [])
 
@@ -75,10 +74,6 @@ function Manager() {
 
   const getMd5Set = useCallback(() => {
     return refMd5Set.current
-  }, [])
-
-  const getBookUserInfo = useCallback(() => {
-    return refBookUserInfo.current
   }, [])
 
   const handleSelect = useCallback((id, selected) => {
@@ -97,6 +92,18 @@ function Manager() {
 
   const handleHeaderClick = useCallback(() => {
     setSelectBooks({})
+  }, [])
+
+  const handlePutShelf = useCallback(({shelfId, bookId, newShelf}) => {
+    if (!shelfId) {
+      shelfId = Date.now()
+      newShelf = {name: newShelf, id: shelfId}
+      shelfs.push(newShelf)
+      shelfStorage.set(shelfId, newShelf)
+    }
+    bookUserInfoStorage.set(bookId, {shelf: shelfId})
+    setShelfs(shelfStorage.getAll())
+    setShelf(shelfId)
   }, [])
 
   const handleBatchDelete = () => {
@@ -121,16 +128,45 @@ function Manager() {
   }, [])
 
   const filterBooks = useMemo(() => {
-    if (!searchVal) {
-      return books
+    let result = books
+    if (searchVal) {
+      result = result.filter(b => b.name.includes(searchVal))
     }
-    return books.filter(b => b.name.includes(searchVal))
-  }, [books, searchVal])
+    if (shelf) {
+      result = result.filter(b => {
+        const userInfo = bookUserInfoStorage.get(b.id)
+        if (!userInfo) {
+          return false
+        }
+        return userInfo.shelf === shelf
+      })
+    }
+    return result
+  }, [books, searchVal, shelf])
 
   const handleSelectAll = useCallback(() => {
     books.forEach(b => selectedBooks[b.id] = true)
     setSelectBooks({...selectedBooks})
   }, [books, selectedBooks])
+
+  const handleShelfChange = useCallback((val) => {
+    setShelf(val)
+  }, [])
+
+  const handleDeleteShelf = () => {
+    shelfStorage.delete(shelf)
+    setShelf('')
+    setShelfs(shelfStorage.getAll())
+  }
+
+  const groups = [
+    {label: '全部', value: ''},
+    ...shelfs.map(_ => ({label: _.name, value: _.id}))
+  ]
+
+  const shelfMenus = [
+    {label: <Button disabled={!shelf} onClick={handleDeleteShelf}>删除书架</Button>, key: 0}
+  ]
 
   return (
     <div className="manager">
@@ -140,9 +176,10 @@ function Manager() {
         <input ref={refFileInput} className="file-input" multiple type="file" accept=".epub,.mobi,.azw3,fb2,cbz" onChange={handleFileChange}/>
         <Input className="search-input"
           prefix={<SearchOutlined/>} onChange={handleSearch} onCompositionEnd={handleCompositionEnd} onCompositionStart={handleCompositionStart}
-          addonAfter={<MoreMenu onRestoreComplete={handleRestoreComplete} getMd5Set={getMd5Set} getBookUserInfo={getBookUserInfo}/>}
+          addonAfter={<MoreMenu onRestoreComplete={handleRestoreComplete} getMd5Set={getMd5Set}/>}
           suffix={<PlusOutlined className="import-btn" onClick={handleClickImport}/>}
         />
+        <Segmented className="manager-shelfs" options={groups} onChange={handleShelfChange} value={shelf}/>
       </div>
       <div className="manager-books-wrapper">
         {
@@ -155,10 +192,12 @@ function Manager() {
           {filterBooks.map((book) => (
             <BookCard key={book.id} selected={selectedBooks[book.id]} info={book}
               onDelete={handleDelete} onSelect={handleSelect} onClick={handleClickBook} onSelectAll={handleSelectAll}
-              />
+              shelfs={shelfs} onPutShelf={handlePutShelf}
+            />
           ))}
         </div>
       </div>
+      <Dropdown className="shelf-menus" menu={{items: shelfMenus}} trigger={['click']}><EllipsisOutlined/></Dropdown>
     </div>
   )
 }

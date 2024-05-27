@@ -7,7 +7,7 @@ import {Button, Progress} from 'antd'
 import {EPUB} from '~/foliate-js/epub'
 import Dir from './Dir'
 import Hammer from 'hammerjs'
-import Storage from '~/storage/localStorage'
+import {ObjectStorage} from '~/storage/localStorage'
 import color from '~/config/color'
 import {toArrayBuffer} from '~/utils/fileReader'
 import {getMd5, saveBooks} from '../manager/utils'
@@ -31,7 +31,7 @@ export default class Book extends React.Component<IProps, IState> {
   private book
   private id: number
   private hammer: Hammer
-  private bookUserInfo: Storage
+  private bookUserInfo: ObjectStorage
   private startTouch: any
   private touchStartTime: number
   public state: IState = {
@@ -85,7 +85,7 @@ export default class Book extends React.Component<IProps, IState> {
       alert('id 不存在')
       return
     }
-    this.bookUserInfo = new Storage('book-userinfo', id)
+    this.bookUserInfo = new ObjectStorage({name: 'book-userinfo', id})
     this.id = id
     const fraction = this.bookUserInfo.get('fraction') || 0
     const data = await iddb.getBookData(id)
@@ -215,7 +215,7 @@ export default class Book extends React.Component<IProps, IState> {
           !fullReader &&
           <div className="footer">
             <Button className="prev" type="text" size="large" icon={<LeftOutlined/>} disabled={this.isPrevDisabled()} onClick={this.prev}></Button>
-            <Dir toc={toc} goto={this.goto} title={title} sectionIndex={sectionIndex}/>
+            <Dir toc={toc} goto={this.goto} title={title}/>
             <Progress className="reader-progress" percent={Math.round(fraction * 100)} strokeColor={color.pr2} />
             <Button className="next" type="text" size="large" icon={<RightOutlined/>} disabled={this.isNextDisabled()} onClick={this.next}></Button>
           </div>

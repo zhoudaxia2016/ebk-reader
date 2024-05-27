@@ -6,9 +6,10 @@ import JSZip from 'jszip'
 import {parseFileName} from '../utils'
 import ProgressModal from '~/components/ProgressModal'
 import {saveAs} from 'file-saver'
+import {bookUserInfoStorage} from '~/storage/localStorage'
 
-export function getExportConfig(bookUserInfo, booksInfo) {
-  console.log('zz_debug', bookUserInfo, booksInfo)
+export function getExportConfig(booksInfo) {
+  const bookUserInfo = bookUserInfoStorage.getAll()
   const config = Object.keys(bookUserInfo).map(id => {
     const info = booksInfo.find(_ => _[0] === Number(id))
     if (!info) {
@@ -22,7 +23,7 @@ export function getExportConfig(bookUserInfo, booksInfo) {
   return JSON.stringify(config)
 }
 
-export default function Backup({getBookUserInfo}) {
+export default function Backup() {
   const refProgress = useRef<ProgressModal>()
   const handleBackup = useCallback(async () => {
     refProgress.current.open()
@@ -38,9 +39,7 @@ export default function Backup({getBookUserInfo}) {
       }
       zip.file(`${name}.${ext}`, data)
     })
-    const bookUserInfo = getBookUserInfo()
-    const bookUserInfoConfig = bookUserInfo.getAll()
-    const config = getExportConfig(bookUserInfoConfig, booksInfo)
+    const config = getExportConfig(booksInfo)
     zip.file(backupConfig, config)
     zip.generateAsync({type: 'blob'}, function(metadata) {
       refProgress.current.updatePercent(metadata.percent)

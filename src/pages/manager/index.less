@@ -8,8 +8,19 @@
 .manager-header {
   display: flex;
   justify-content: center;
+  flex-direction: column;
+  align-items: center;
   padding: 120px 0 100px;
   background: var(--bg3);
+}
+
+.manager-shelfs {
+  width: 600px;
+  margin-top: 20px;
+  background: transparent;
+  .ant-segmented-item-selected {
+    background: var(--bg1);
+  }
 }
 
 .search-input {
@@ -46,9 +57,12 @@
     padding: 20px;
     background: var(--bg2);
   }
+  .search-input,
+  .manager-shelfs {
+    width: 100%;
+  }
   .search-input {
     height: 40px;
-    width: 100%;
     .ant-input-affix-wrapper {
       font-size: 16px;
     }
@@ -154,4 +168,10 @@
   height: 40px;
   background: var(--bg1);
   z-index: 1;
+}
+
+.shelf-menus {
+  position: fixed;
+  bottom: 50px;
+  right: 20px;
 }

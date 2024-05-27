@@ -4,8 +4,9 @@ import {backupConfig} from './config'
 import {saveBooks} from '../utils'
 import {loadAsync} from 'jszip'
 import ProgressModal from '~/components/ProgressModal'
+import {bookUserInfoStorage} from '~/storage/localStorage'
 
-export default function Backup({notice, getMd5Set, getBookUserInfo, onComplete}) {
+export default function Backup({notice, getMd5Set, onComplete}) {
   const refProgress = useRef<ProgressModal>()
   const handleRestoreInputChange = useCallback(async (e) => {
     const file = e.target.files[0]
@@ -23,11 +24,10 @@ export default function Backup({notice, getMd5Set, getBookUserInfo, onComplete})
     refProgress.current.open()
     const {successFiles, failFiles} = await saveBooks({files, md5Set: getMd5Set(), isBuffer: true, onProgress: (p) => refProgress.current.updatePercent(p)})
     refProgress.current.close()
-    const bookUserInfo = getBookUserInfo()
     successFiles.forEach(({id, md5}) => {
       const config = allConfig.find(_ => _.md5 === md5)
       if (config) {
-        bookUserInfo.set(id, config.config)
+        bookUserInfoStorage.set(id, config.config)
       }
     })
     const bookNum = files.length

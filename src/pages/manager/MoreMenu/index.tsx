@@ -7,17 +7,17 @@ import BackupConfig from './BackupConfig'
 import RestoreConfig from './RestoreConfig'
 import {isMobile} from '~/utils/userAgent'
 
-export default function MoreMenu({onRestoreComplete, getBookUserInfo, getMd5Set}) {
+export default function MoreMenu({onRestoreComplete, getMd5Set}) {
   const [notice, contextHolder] = notification.useNotification()
   const menuItems = [
-    {label: <BackupConfig getBookUserInfo={getBookUserInfo}/>, key: 3},
-    {label: <RestoreConfig getBookUserInfo={getBookUserInfo} onComplete={onRestoreComplete}/>, key: 4},
+    {label: <BackupConfig/>, key: 3},
+    {label: <RestoreConfig onComplete={onRestoreComplete}/>, key: 4},
   ]
   if (!isMobile) {
     menuItems.push(...[
-      {label: <Backup getBookUserInfo={getBookUserInfo}/>, key: 1},
+      {label: <Backup/>, key: 1},
       {label: <Restore notice={notice} onComplete={onRestoreComplete}
-        getBookUserInfo={getBookUserInfo} getMd5Set={getMd5Set}/>, key: 2},
+        getMd5Set={getMd5Set}/>, key: 2},
     ])
   }
   return (
