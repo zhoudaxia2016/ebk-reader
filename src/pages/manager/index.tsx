@@ -165,7 +165,7 @@ function Manager() {
   ]
 
   const shelfMenus = [
-    {label: <Button disabled={!shelf} onClick={handleDeleteShelf}>删除书架</Button>, key: 0}
+    {label: <Button type="text" disabled={!shelf} onClick={handleDeleteShelf}>删除书架</Button>, key: 0}
   ]
 
   return (
@@ -197,7 +197,9 @@ function Manager() {
           ))}
         </div>
       </div>
-      <Dropdown className="shelf-menus" menu={{items: shelfMenus}} trigger={['click']}><EllipsisOutlined/></Dropdown>
+      <Dropdown className="shelf-menus" menu={{items: shelfMenus}} trigger={['click']}>
+        <Button><EllipsisOutlined/></Button>
+      </Dropdown>
     </div>
   )
 }
