@@ -75,7 +75,7 @@ export class ObjectStorage extends Storage {
       data[key] = value
       allData[this.id] = data
     } else {
-      allData[key] = {...allData[key], ...value}
+      allData[key] = typeof value === 'object' ? {...allData[key], ...value} : value
     }
     this.setItem(allData)
   }
@@ -87,8 +87,10 @@ export class ObjectStorage extends Storage {
 
 const shelfStorage = new ArrayStorage({name: 'shelf'})
 const bookUserInfoStorage = new ObjectStorage({name: 'book-userinfo'})
+const userInfoStorage = new ObjectStorage({name: 'userinfo'})
 
 export {
   shelfStorage,
   bookUserInfoStorage,
+  userInfoStorage
 }

@@ -4,7 +4,7 @@ import {Button, Input, notification, Segmented, Dropdown} from 'antd'
 import {PlusOutlined, SearchOutlined, EllipsisOutlined} from '@ant-design/icons'
 import iddb from '~/storage/iddb'
 import BookCard from './BookCard'
-import {shelfStorage, bookUserInfoStorage} from '~/storage/localStorage'
+import {shelfStorage, bookUserInfoStorage, userInfoStorage} from '~/storage/localStorage'
 import MoreMenu from './MoreMenu'
 import {saveBooks} from './utils'
 import {useNavigate} from 'react-router-dom'
@@ -21,7 +21,9 @@ function Manager() {
   const [searchVal, setSearchVal] = useState('')
   const [isComp, setIsComp] = useState(false)
   const [shelfs, setShelfs] = useState(shelfStorage.getAll())
-  const [shelf, setShelf] = useState('')
+  const [selectShelf, setSelectShelf] = useState(() => {
+    return userInfoStorage.get('selectShelf')
+  })
 
   const loadBooks = async () => {
     const books = (await iddb.getAllBookInfo()).map(_ => _[1])
@@ -103,7 +105,7 @@ function Manager() {
     }
     bookUserInfoStorage.set(bookId, {shelf: shelfId})
     setShelfs(shelfStorage.getAll())
-    setShelf(shelfId)
+    setSelectShelf(shelfId)
   }, [])
 
   const handleBatchDelete = () => {
@@ -132,17 +134,17 @@ function Manager() {
     if (searchVal) {
       result = result.filter(b => b.name.includes(searchVal))
     }
-    if (shelf) {
+    if (selectShelf) {
       result = result.filter(b => {
         const userInfo = bookUserInfoStorage.get(b.id)
         if (!userInfo) {
           return false
         }
-        return userInfo.shelf === shelf
+        return userInfo.shelf === selectShelf
       })
     }
     return result
-  }, [books, searchVal, shelf])
+  }, [books, searchVal, selectShelf])
 
   const handleSelectAll = useCallback(() => {
     books.forEach(b => selectedBooks[b.id] = true)
@@ -150,12 +152,16 @@ function Manager() {
   }, [books, selectedBooks])
 
   const handleShelfChange = useCallback((val) => {
-    setShelf(val)
+    setSelectShelf(val)
   }, [])
 
+  useEffect(() => {
+    userInfoStorage.set('selectShelf', selectShelf)
+  }, [selectShelf])
+
   const handleDeleteShelf = () => {
-    shelfStorage.delete(shelf)
-    setShelf('')
+    shelfStorage.delete(selectShelf)
+    setSelectShelf('')
     setShelfs(shelfStorage.getAll())
   }
 
@@ -165,7 +171,7 @@ function Manager() {
   ]
 
   const shelfMenus = [
-    {label: <Button type="text" disabled={!shelf} onClick={handleDeleteShelf}>删除书架</Button>, key: 0}
+    {label: <Button type="text" disabled={!selectShelf} onClick={handleDeleteShelf}>删除书架</Button>, key: 0}
   ]
 
   return (
@@ -179,7 +185,7 @@ function Manager() {
           addonAfter={<MoreMenu onRestoreComplete={handleRestoreComplete} getMd5Set={getMd5Set}/>}
           suffix={<PlusOutlined className="import-btn" onClick={handleClickImport}/>}
         />
-        <Segmented className="manager-shelfs" options={groups} onChange={handleShelfChange} value={shelf}/>
+        <Segmented className="manager-shelfs" options={groups} onChange={handleShelfChange} value={selectShelf}/>
       </div>
       <div className="manager-books-wrapper">
         {
