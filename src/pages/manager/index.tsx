@@ -165,13 +165,34 @@ function Manager() {
     setShelfs(shelfStorage.getAll())
   }
 
+  const handleDeleteEmptyShelf = () => {
+    const bookUserInfo = bookUserInfoStorage.getAll()
+    const shelfsBookNum = {}
+    Object.values(bookUserInfo).forEach((_: any) => {
+      if (_.shelf) {
+        shelfsBookNum[_.shelf] = shelfsBookNum[_.shelf] || 0
+        shelfsBookNum[_.shelf]++
+      }
+    })
+    shelfs.forEach(_ => {
+      if (!shelfsBookNum[_.id]) {
+        if (selectShelf === _.id) {
+          setSelectShelf('')
+        }
+        shelfStorage.delete(_.id)
+      }
+    })
+    setShelfs(shelfStorage.getAll())
+  }
+
   const groups = [
     {label: '全部', value: ''},
     ...shelfs.map(_ => ({label: _.name, value: _.id}))
   ]
 
   const shelfMenus = [
-    {label: <Button type="text" disabled={!selectShelf} onClick={handleDeleteShelf}>删除书架</Button>, key: 0}
+    {label: <Button type="text" disabled={!selectShelf} onClick={handleDeleteShelf}>删除书架</Button>, key: 0},
+    {label: <Button type="text" onClick={handleDeleteEmptyShelf}>删除空书架</Button>, key: 1},
   ]
 
   return (
