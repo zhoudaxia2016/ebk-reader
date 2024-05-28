@@ -4,6 +4,7 @@ import {Button, Dropdown, Modal} from 'antd'
 import formatDate from '~/utils/formatDate'
 import {CheckCircleFilled} from '@ant-design/icons'
 import ShelfForm from './ShelfForm'
+import defaultCover from '~/images/default-cover.svg'
 
 interface IProps {
   info: any,
@@ -24,9 +25,14 @@ export default function BookCard({info: {author, title, cover, id, published = '
     if (!cover) {
       return
     }
-    toDataURL(cover).then((src: any) => {
-      setCoverSrc(src)
-    })
+    console.log('zz_debug', cover.type)
+    if (/^application/.test(cover.type)) {
+      setCoverSrc(defaultCover)
+    } else {
+      toDataURL(cover).then((src: any) => {
+        setCoverSrc(src)
+      })
+    }
   }, [cover])
 
   const handleDelete = useCallback(async () => {
