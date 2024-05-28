@@ -43,7 +43,7 @@ function Manager() {
 
   const handleFileChange = useCallback(async (e) => {
     refProgress.current.open()
-    const {failFiles} = await saveBooks({files: [...e.target.files], md5Set: refMd5Set.current, onProgress: (p) => refProgress.current.updatePercent(p)})
+    const {failFiles, successFiles} = await saveBooks({files: [...e.target.files], md5Set: refMd5Set.current, onProgress: (p) => refProgress.current.updatePercent(p)})
     refProgress.current.close()
     const bookNum = e.target.files.length
     const failNum = failFiles.length
@@ -59,8 +59,13 @@ function Manager() {
         duration: 1,
       })
     }
+    if (selectShelf) {
+      successFiles.forEach(_ => {
+        bookUserInfoStorage.set(_.id, {shelf: selectShelf})
+      })
+    }
     loadBooks()
-  }, [books, notice])
+  }, [books, notice, selectShelf])
 
   useEffect(() => {
     loadBooks()
