@@ -1,7 +1,7 @@
 import './index.less'
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react'
 import {Button, Input, notification, Segmented, Dropdown} from 'antd'
-import {PlusOutlined, SearchOutlined, EllipsisOutlined} from '@ant-design/icons'
+import {PlusOutlined, SearchOutlined, UnorderedListOutlined} from '@ant-design/icons'
 import iddb from '~/storage/iddb'
 import BookCard from './BookCard'
 import {shelfStorage, bookUserInfoStorage, userInfoStorage} from '~/storage/localStorage'
@@ -237,7 +237,7 @@ function Manager() {
         </div>
       </div>
       <Dropdown className="shelf-menus" menu={{items: shelfMenus}} trigger={['click']}>
-        <Button><EllipsisOutlined/></Button>
+        <Button><UnorderedListOutlined/></Button>
       </Dropdown>
     </div>
   )
