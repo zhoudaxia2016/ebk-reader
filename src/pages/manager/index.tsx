@@ -9,6 +9,7 @@ import MoreMenu from './MoreMenu'
 import {saveBooks} from './utils'
 import {useNavigate} from 'react-router-dom'
 import ProgressModal from '~/components/ProgressModal'
+import ShelfForm from './BookCard/ShelfForm'
 
 function Manager() {
   const [books, setBooks] = useState<any[]>([])
@@ -103,10 +104,15 @@ function Manager() {
       shelfs.push(newShelf)
       shelfStorage.set(shelfId, newShelf)
     }
-    bookUserInfoStorage.set(bookId, {shelf: shelfId})
+    if (bookId) {
+      bookUserInfoStorage.set(bookId, {shelf: shelfId})
+    } else {
+      Object.keys(selectedBooks).forEach(id => selectedBooks[id] && bookUserInfoStorage.set(id, {shelf: shelfId}))
+      setSelectBooks({})
+    }
     setShelfs(shelfStorage.getAll())
     setSelectShelf(shelfId)
-  }, [])
+  }, [selectedBooks])
 
   const handleBatchDelete = () => {
     Object.keys(selectedBooks).forEach(id => selectedBooks[id] && handleDelete(Number(id)))
@@ -213,6 +219,7 @@ function Manager() {
           showOperation &&
           <div className="manager-operations">
             <Button type="text" onClick={handleBatchDelete}>删除</Button>
+            <ShelfForm shelfs={shelfs} onFinish={handlePutShelf}/>
           </div>
         }
         <div className="manager-books">

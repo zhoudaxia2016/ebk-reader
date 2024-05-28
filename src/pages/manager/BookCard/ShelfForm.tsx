@@ -7,7 +7,7 @@ const {Item} = Form
 
 const formName = 'shelf'
 
-function ShelfForm({bookId, shelfs = [], onFinish}) {
+function ShelfForm({bookId = '', shelfs = [], onFinish}) {
   const [open, setOpen] = useState(false)
   const [notice, contextHolder] = notification.useNotification()
   const [selectShelf, setSelectShelf] = useState('')
