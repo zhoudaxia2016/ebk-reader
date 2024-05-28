@@ -11,6 +11,7 @@ function ShelfForm({bookId, shelfs = [], onFinish}) {
   const [open, setOpen] = useState(false)
   const [notice, contextHolder] = notification.useNotification()
   const [selectShelf, setSelectShelf] = useState('')
+  const [form] = Form.useForm()
   const handleOpen = useCallback(() => {
     const userInfo = bookUserInfoStorage.get(bookId)
     if (userInfo?.shelf && shelfs.some(_ => _.id === userInfo.shelf)) {
@@ -19,7 +20,7 @@ function ShelfForm({bookId, shelfs = [], onFinish}) {
       setSelectShelf('')
     }
     setOpen(true)
-  }, [bookId, shelfs])
+  }, [bookId, shelfs, form])
   const handleClose = useCallback(() => {
     setOpen(false)
   }, [])
@@ -32,7 +33,7 @@ function ShelfForm({bookId, shelfs = [], onFinish}) {
     }
     onFinish({...e, bookId})
     setOpen(false)
-  }, [bookId, onFinish])
+  }, [bookId, onFinish, shelfs])
   
   const handleShelfChange = useCallback((id) => {
     setSelectShelf(id)
@@ -48,8 +49,8 @@ function ShelfForm({bookId, shelfs = [], onFinish}) {
     <>
       {contextHolder}
       <Button type="text"  onClick={handleOpen}>加入书架</Button>
-      <Modal className="shelf-form-modal" maskClosable open={open} footer={footer} onCancel={handleClose} title="加入书架">
-        <Form className="shelf-form" name={formName} onFinish={handleFinish} initialValues={{shelfId: selectShelf}}>
+      <Modal className="shelf-form-modal" maskClosable open={open} footer={footer} onCancel={handleClose} title="加入书架" destroyOnClose>
+        <Form form={form} className="shelf-form" name={formName} onFinish={handleFinish} initialValues={{shelfId: selectShelf, newShelf: ''}}>
           <Item label="选择" name="shelfId">
             <Select size="large" onChange={handleShelfChange}>
               <Option value="">新建书架</Option>
@@ -57,7 +58,7 @@ function ShelfForm({bookId, shelfs = [], onFinish}) {
             </Select>
           </Item>
           <Item label="新建" name="newShelf">
-            <Input size="large" disabled={!!selectShelf}/>
+            <Input size="large" disabled={!!selectShelf} autoComplete="off"/>
           </Item>
         </Form>
       </Modal>
