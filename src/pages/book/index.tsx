@@ -104,12 +104,24 @@ export default class Book extends React.Component<IProps, IState> {
     view.goToFraction(fraction)
     view.addEventListener('relocate', this.handleRelocate)
     view.addEventListener('load', this.handleLoad)
+    document.addEventListener('visibilitychange', this.handleVisibilityChange)
   }
 
   componentWillUnmount() {
     this.state.view?.removeEventListener('relocate', this.handleRelocate)
     this.state.view?.removeEventListener('load', this.handleLoad)
     this.state.view?.renderer.destroy()
+    document.removeEventListener('visibilitychange', this.handleVisibilityChange)
+    this.setAccessTime()
+  }
+
+  private handleVisibilityChange = () => {
+    if (document.hidden) {
+      this.setAccessTime()
+    }
+  }
+
+  private setAccessTime() {
     this.bookUserInfo?.set('accessTime', Date.now())
   }
 
