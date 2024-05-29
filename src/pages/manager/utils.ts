@@ -1,7 +1,8 @@
-import {toArrayBuffer} from '~/utils/fileReader'
+import {toArrayBuffer, toText} from '~/utils/fileReader'
 import {getBook} from '~/utils/reader'
 import CryptoJS from 'crypto-js'
 import iddb from '~/storage/iddb'
+import {joinPath} from '~/utils/path'
 
 export function getMd5(data) {
   const hash = CryptoJS.MD5(CryptoJS.lib.WordArray.create(data))
@@ -36,7 +37,16 @@ export const saveBooks = async ({files, md5Set, isBuffer, onProgress}: {files: a
       return {name: file.name, isSuccess: false}
     }
     md5Set.add(md5)
-    const cover = await book.getCover()
+    let cover = await book.getCover()
+    if (cover?.type === 'application/xhtml+xml') {
+      const coverHtml = await toText(cover)
+      const res = /<img[^>]*src=['"]([^>]+)['"][^>]+\/>/.exec(coverHtml)
+      const htmlPath = /(.*?)[^/]*$/.exec(book.resources.cover?.href)
+      if (res && htmlPath) {
+        const coverImgPath = joinPath(htmlPath[1], res[1])
+        cover = await book.loadBlob(coverImgPath)
+      }
+    }
     const createTime = Date.now()
     const id = await iddb.addBook(data, {createTime, cover, name: file.name, type: file.type, md5, ...book.metadata})
     finishCount++

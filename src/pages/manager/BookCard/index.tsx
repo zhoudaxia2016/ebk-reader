@@ -25,7 +25,6 @@ export default function BookCard({info: {author, title, cover, id, published = '
     if (!cover) {
       return
     }
-    console.log('zz_debug', cover.type)
     if (/^application/.test(cover.type)) {
       setCoverSrc(defaultCover)
     } else {
