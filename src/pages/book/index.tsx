@@ -2,8 +2,8 @@ import './index.less'
 import React from 'react'
 import iddb from '~/storage/iddb'
 import {getBook, mountBook} from '~/utils/reader'
-import {LeftOutlined, RightOutlined, HomeOutlined, SearchOutlined} from '@ant-design/icons'
-import {Button, Progress} from 'antd'
+import {LeftOutlined, RightOutlined, HomeOutlined, EllipsisOutlined, SearchOutlined, BackwardOutlined, ForwardOutlined} from '@ant-design/icons'
+import {Button, Dropdown, Progress} from 'antd'
 import {EPUB} from '~/foliate-js/epub'
 import Dir from './Dir'
 import Hammer from 'hammerjs'
@@ -36,6 +36,8 @@ export default class Book extends React.Component<IProps, IState> {
   private bookUserInfo: ObjectStorage
   private startTouch: any
   private touchStartTime: number
+  private isSectionChanged = false
+  private isLoad = false
   public state: IState = {
     sections: [],
     sectionIndex: 0,
@@ -104,7 +106,7 @@ export default class Book extends React.Component<IProps, IState> {
       view,
       fraction,
     })
-    view.goToFraction(fraction)
+    view.goToFraction(fraction).then(() => this.isLoad = true)
     view.addEventListener('relocate', this.handleRelocate)
     view.addEventListener('load', this.handleLoad)
     document.addEventListener('visibilitychange', this.handleVisibilityChange)
@@ -132,6 +134,18 @@ export default class Book extends React.Component<IProps, IState> {
     const {fraction} = e.detail
     this.bookUserInfo.set('fraction', fraction)
     this.setState({fraction})
+    if (!this.isLoad) {
+      return
+    }
+    setTimeout(() => {
+      const {view} = this.state
+      if (this.isSectionChanged) {
+        view.history.pushState({fraction})
+      } else {
+        view.history.replaceState({fraction})
+      }
+      this.isSectionChanged = false
+    })
   }
 
   private handleTap = () => {
@@ -180,11 +194,12 @@ export default class Book extends React.Component<IProps, IState> {
   }
 
   private handleLoad = (e) => {
+    const {view} = this.state
     const doc = e.detail.doc
     if (/^\s+$/.test(doc.body.innerText)) {
-      this.state.view.renderer.setAttribute('gap', 0)
+      view.renderer.setAttribute('gap', 0)
     } else {
-      this.state.view.renderer.setAttribute('gap', 6)
+      view.renderer.setAttribute('gap', 6)
     }
     this.hammer?.off('tap', this.handleTap)
     this.hammer?.off('doubletap', this.handleDoubleTap)
@@ -197,11 +212,21 @@ export default class Book extends React.Component<IProps, IState> {
   }
 
   private prev = () => {
+    this.isSectionChanged = true
     this.state.view?.renderer.prevSection()
   }
 
   private next = () => {
+    this.isSectionChanged = true
     this.state.view?.renderer.nextSection()
+  }
+
+  private backward = () => {
+    this.state.view?.history.back()
+  }
+
+  private forward = () => {
+    this.state.view?.history.forward()
   }
 
   private goto = (href) => {
@@ -220,6 +245,26 @@ export default class Book extends React.Component<IProps, IState> {
   render() {
     const {fullReader, toc, fraction, showSearch, view} = this.state
     const title = this.book?.metadata.title
+
+    const menus = [
+      {
+        label: (
+          <Button type="text" disabled={!view?.history.canGoBack}>
+            <BackwardOutlined onClick={this.backward}/>
+          </Button>
+        ),
+        key: 0
+      },
+      {
+        label: (
+          <Button type="text" disabled={!view?.history.canGoForward}>
+            <ForwardOutlined onClick={this.forward}/>
+          </Button>
+        ),
+        key: 1
+      },
+    ]
+
     return (
       <div className="reader-wrapper">
         <div className="reader" ref={this.refReader}></div>
@@ -244,6 +289,12 @@ export default class Book extends React.Component<IProps, IState> {
               <Button className="next" type="text" size="large" icon={<RightOutlined/>} disabled={this.isNextDisabled()} onClick={this.next}></Button>
             </div>
           </div>
+        }
+        {
+          !fullReader &&
+          <Dropdown className="book-more-dropdown" menu={{items: menus}} trigger={['click']}>
+            <Button className="book-more-btn"><EllipsisOutlined/></Button>
+          </Dropdown>
         }
       </div>
     )
