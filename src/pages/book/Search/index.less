@@ -1,0 +1,45 @@
+.book-search {
+  display: flex;
+  flex-direction: column;
+  padding: 15px 10px 0;
+  height: 40vh;
+  &-input {
+    height: 40px;
+    border-radius: 20px;
+    background: var(--bg2) !important;
+    border: none !important;
+  }
+}
+
+.search-results {
+  position: relative;
+  height: 0;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.search-result {
+  margin-bottom: 6px;
+  &-title {
+    position: sticky;
+    top: 0;
+    font-size: 18px;
+    line-height: 44px;
+    font-weight: bold;
+    background: #fff;
+    box-shadow: 0 -1px #fff;
+  }
+  &-excerpt {
+    margin-bottom: 8px;
+    font-size: 16px;
+    line-height: 24px;
+    cursor: pointer;
+  }
+  &-match {
+    color: var(--pr1);
+  }
+}
+
+.search-progress {
+  margin: auto;
+}

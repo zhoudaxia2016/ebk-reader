@@ -2,7 +2,7 @@ import './index.less'
 import React from 'react'
 import iddb from '~/storage/iddb'
 import {getBook, mountBook} from '~/utils/reader'
-import {LeftOutlined, RightOutlined, HomeOutlined} from '@ant-design/icons'
+import {LeftOutlined, RightOutlined, HomeOutlined, SearchOutlined} from '@ant-design/icons'
 import {Button, Progress} from 'antd'
 import {EPUB} from '~/foliate-js/epub'
 import Dir from './Dir'
@@ -11,6 +11,7 @@ import {ObjectStorage} from '~/storage/localStorage'
 import color from '~/config/color'
 import {toArrayBuffer} from '~/utils/fileReader'
 import {getMd5, saveBooks} from '../manager/utils'
+import Search from './Search'
 
 interface IProps {
   searchParams: any,
@@ -24,6 +25,7 @@ interface IState {
   toc: any[],
   fullReader: boolean,
   fraction: number,
+  showSearch: boolean,
 }
 
 export default class Book extends React.Component<IProps, IState> {
@@ -40,6 +42,7 @@ export default class Book extends React.Component<IProps, IState> {
     toc: [],
     fullReader: false,
     fraction: 0,
+    showSearch: false,
   }
 
   private handleLaunchWithFile(): Promise<number | void> {
@@ -132,8 +135,8 @@ export default class Book extends React.Component<IProps, IState> {
   }
 
   private handleTap = () => {
-    const {fullReader} = this.state
-    this.setState({fullReader: !fullReader})
+    const {fullReader, showSearch} = this.state
+    this.setState({fullReader: !fullReader, showSearch: showSearch && !fullReader})
   }
 
   private handleDoubleTap = () => {
@@ -210,8 +213,12 @@ export default class Book extends React.Component<IProps, IState> {
     navigate('/')
   }
 
+  private toggleSearch = () => {
+    this.setState({showSearch: !this.state.showSearch})
+  }
+
   render() {
-    const {fullReader, toc, fraction, sectionIndex} = this.state
+    const {fullReader, toc, fraction, showSearch, view} = this.state
     const title = this.book?.metadata.title
     return (
       <div className="reader-wrapper">
@@ -226,10 +233,16 @@ export default class Book extends React.Component<IProps, IState> {
         {
           !fullReader &&
           <div className="footer">
-            <Button className="prev" type="text" size="large" icon={<LeftOutlined/>} disabled={this.isPrevDisabled()} onClick={this.prev}></Button>
-            <Dir toc={toc} goto={this.goto} title={title}/>
-            <Progress className="reader-progress" percent={Math.round(fraction * 100)} strokeColor={color.pr2} />
-            <Button className="next" type="text" size="large" icon={<RightOutlined/>} disabled={this.isNextDisabled()} onClick={this.next}></Button>
+            <div className="footer-content">
+              {showSearch && <Search view={view}/>}
+            </div>
+            <div className="footer-btns">
+              <Dir toc={toc} goto={this.goto} title={title}/>
+              <Button className="search" type="text" size="large" icon={<SearchOutlined/>} onClick={this.toggleSearch}></Button>
+              <Progress className="reader-progress" type="circle" size="small" percent={Math.round(fraction * 100)} strokeColor={color.pr2} />
+              <Button className="prev" type="text" size="large" icon={<LeftOutlined/>} disabled={this.isPrevDisabled()} onClick={this.prev}></Button>
+              <Button className="next" type="text" size="large" icon={<RightOutlined/>} disabled={this.isNextDisabled()} onClick={this.next}></Button>
+            </div>
           </div>
         }
       </div>

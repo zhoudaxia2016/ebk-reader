@@ -23,19 +23,17 @@
     background: var(--bg1);
   }
   .footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    padding: 0 20px;
     bottom: 0;
-    height: 80px;
     left: 0;
     background: var(--bg1);
-  }
-  .prev {
-    margin-left: 10px;
-  }
-  .next {
-    margin-right: 10px;
+    box-shadow: rgba(17, 17, 26, 0.1) 0px 0px 16px;
+    &-btns {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 80px;
+    }
   }
   .back-home-btn {
     position: absolute;
@@ -52,15 +50,20 @@
 }
 
 .reader-progress {
-  margin-left: 10px;
-  flex: 1;
+  .ant-progress-inner {
+    width: 40px !important;
+    height: 40px !important;
+    font-size: 12px !important;
+  }
 }
 
 @media screen and (max-width: 800px) {
   .reader-wrapper {
     width: 100%;
     .footer {
-      height: 50px;
+      &-btns {
+        height: 50px;
+      }
     }
     .header {
       background: var(--bg2);
