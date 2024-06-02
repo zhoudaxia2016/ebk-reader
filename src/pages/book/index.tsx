@@ -61,6 +61,8 @@ export default class Book extends React.Component<IProps, IState> {
     await reader.init(this.refReaderContainer.current)
     this.reader = reader
     const fraction = reader.bookUserInfo.get('fraction')
+    reader.view.addEventListener('touchstart', this.handleTouchStart)
+    reader.view.addEventListener('touchend', this.handleTouchEnd)
     this.setState({
       sections: reader.book.sections,
       toc: reader.book.toc,
@@ -69,6 +71,8 @@ export default class Book extends React.Component<IProps, IState> {
   }
 
   componentWillUnmount() {
+    this.reader?.view.removeEventListener('touchstart', this.handleTouchStart)
+    this.reader?.view.removeEventListener('touchend', this.handleTouchEnd)
     this.reader?.destroy()
     this.reader = null
   }
@@ -113,7 +117,7 @@ export default class Book extends React.Component<IProps, IState> {
     const end = e.changedTouches[0]
     const hr = end.screenX - start.screenX
     const vr = end.screenY - start.screenY
-    if (Math.abs(hr) > Math.abs(vr) && Math.abs(hr) > 90) {
+    if (Math.abs(hr) > Math.abs(vr) && Math.abs(hr) > 55) {
       if (hr < 0 && !this.isNextDisabled()) {
         this.next()
       }
