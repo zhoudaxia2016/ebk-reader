@@ -21,6 +21,8 @@ interface IState {
   fullReader: boolean,
   fraction: number,
   showSearch: boolean,
+  pages?: number,
+  page?: number,
 }
 
 export default class Book extends React.Component<IProps, IState> {
@@ -72,7 +74,8 @@ export default class Book extends React.Component<IProps, IState> {
   }
 
   private handleRelocate = ({fraction}) => {
-    this.setState({fraction})
+    const {pages, page} = this.reader.view.renderer || {}
+    this.setState({fraction, pages, page: page + 1})
   }
 
   private handleTap = () => {
@@ -161,7 +164,7 @@ export default class Book extends React.Component<IProps, IState> {
   }
 
   render() {
-    const {fullReader, toc, fraction, showSearch} = this.state
+    const {fullReader, toc, fraction, showSearch, pages, page} = this.state
     const title = this.book?.metadata.title
     const reader = this.reader
 
@@ -203,7 +206,8 @@ export default class Book extends React.Component<IProps, IState> {
             <div className="footer-btns">
               <Dir toc={toc} goto={this.goto} title={title}/>
               <Button className="search" type="text" size="large" icon={<SearchOutlined/>} onClick={this.toggleSearch}></Button>
-              <Progress className="reader-progress" type="circle" size="small" percent={Math.round(fraction * 100)} strokeColor={color.pr2} />
+              <Progress className="reader-progress" type="circle" size="small" percent={Math.round(fraction * 100)}
+                  strokeColor={color.pr2} format={() => page && `${page}/${pages}`}/>
               <Button className="prev" type="text" size="large" icon={<LeftOutlined/>} disabled={this.isPrevDisabled()} onClick={this.prev}></Button>
               <Button className="next" type="text" size="large" icon={<RightOutlined/>} disabled={this.isNextDisabled()} onClick={this.next}></Button>
             </div>
