@@ -6,21 +6,27 @@ import JSZip from 'jszip'
 import {parseFileName} from '~/utils/utils'
 import ProgressModal from '~/components/ProgressModal'
 import {saveAs} from 'file-saver'
-import {bookUserInfoStorage} from '~/storage/localStorage'
+import {bookUserInfoStorage, shelfStorage} from '~/storage/localStorage'
 
 export function getExportConfig(booksInfo) {
   const bookUserInfo = bookUserInfoStorage.getAll()
+  const shelfs = shelfStorage.getAll()
   const config = Object.keys(bookUserInfo).map(id => {
     const info = booksInfo.find(_ => _[0] === Number(id))
     if (!info) {
       return
     }
+    const userInfo = bookUserInfo[id]
+    if (userInfo.shelf) {
+      const shelf = shelfs.find(_ => _.id === userInfo.shelf)
+      userInfo.shelf = shelf.name
+    }
     return {
       md5: info[1].md5,
-      config: bookUserInfo[id]
+      config: userInfo,
     }
   }).filter(_ => _)
-  return JSON.stringify(config)
+  return JSON.stringify({bookConfig: config, shelfs: shelfs.map(_ => _.name)})
 }
 
 export default function Backup() {

@@ -50,6 +50,15 @@ export class ArrayStorage extends Storage {
     }
     this.setItem(allData)
   }
+
+  public add(val) {
+    if (!Array.isArray(val)) {
+      val = [val]
+    }
+    const allData = this.getItem([])
+    allData.push(...val)
+    this.setItem(allData)
+  }
 }
 
 export class ObjectStorage extends Storage {

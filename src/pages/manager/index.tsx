@@ -79,6 +79,7 @@ function Manager() {
 
   const handleRestoreComplete = useCallback(() => {
     loadBooks()
+    setShelfs(shelfStorage.getAll())
   }, [loadBooks])
 
   const getMd5Set = useCallback(() => {
