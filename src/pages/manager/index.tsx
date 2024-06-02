@@ -1,7 +1,7 @@
 import './index.less'
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react'
-import {Button, Input, notification, Segmented, Dropdown} from 'antd'
-import {PlusOutlined, SearchOutlined, UnorderedListOutlined} from '@ant-design/icons'
+import {Button, Input, notification, Segmented} from 'antd'
+import {PlusOutlined, SearchOutlined} from '@ant-design/icons'
 import iddb from '~/storage/iddb'
 import BookCard from './BookCard'
 import {shelfStorage, bookUserInfoStorage, userInfoStorage} from '~/storage/localStorage'
@@ -10,6 +10,7 @@ import {saveBooks} from '~/utils/utils'
 import {useNavigate} from 'react-router-dom'
 import ProgressModal from '~/components/ProgressModal'
 import ShelfForm from './BookCard/ShelfForm'
+import ShelfMenu from './ShelfMenu'
 
 function Manager() {
   const [books, setBooks] = useState<any[]>([])
@@ -196,14 +197,13 @@ function Manager() {
     setShelfs(shelfStorage.getAll())
   }
 
+  const handleRenameShelf = () => {
+    setShelfs(shelfStorage.getAll())
+  }
+
   const groups = [
     {label: '全部', value: ''},
     ...shelfs.map(_ => ({label: _.name, value: _.id}))
-  ]
-
-  const shelfMenus = [
-    {label: <Button type="text" disabled={!selectShelf} onClick={handleDeleteShelf}>删除书架</Button>, key: 0},
-    {label: <Button type="text" onClick={handleDeleteEmptyShelf}>删除空书架</Button>, key: 1},
   ]
 
   return (
@@ -236,9 +236,7 @@ function Manager() {
           ))}
         </div>
       </div>
-      <Dropdown className="shelf-menus" menu={{items: shelfMenus}} trigger={['click']}>
-        <Button><UnorderedListOutlined/></Button>
-      </Dropdown>
+      <ShelfMenu selectShelf={selectShelf} onDelete={handleDeleteShelf} onDeleteEmpty={handleDeleteEmptyShelf} onRename={handleRenameShelf}/>
     </div>
   )
 }
