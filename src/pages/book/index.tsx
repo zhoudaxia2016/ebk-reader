@@ -37,7 +37,7 @@ export default class Book extends React.Component<IProps, IState> {
     sections: [],
     sectionIndex: 0,
     toc: [],
-    fullReader: false,
+    fullReader: true,
     fraction: 0,
     showSearch: false,
   }
