@@ -1,4 +1,9 @@
-import 'foliate/view.js'
+import {View} from 'foliate/view.js'
+import {Paginator} from 'foliate/paginator'
+
+interface IView extends View {
+  renderer: Paginator,
+}
 
 const isZip = async file => {
   const arr = new Uint8Array(await file.slice(0, 4).arrayBuffer())
@@ -16,9 +21,9 @@ const makeZipLoader = async file => {
   const { configure, ZipReader, BlobReader, TextWriter, BlobWriter } =
     await import('foliate/vendor/zip.js')
   configure({ useWebWorkers: false })
-  const reader = new ZipReader(new BlobReader(file))
+  const reader: any = new ZipReader(new BlobReader(file))
   const entries = await reader.getEntries()
-  const map = new Map(entries.map(entry => [entry.filename, entry]))
+  const map = new Map<string, any>(entries.map(entry => [entry.filename, entry]))
   const load = f => (name, ...args) =>
     map.has(name) ? f(map.get(name), ...args) : null
   const loadText = load(entry => entry.getData(new TextWriter()))
@@ -29,6 +34,7 @@ const makeZipLoader = async file => {
 
 const getFileEntries = async entry => entry.isFile ? entry
   : (await Promise.all(Array.from(
+    // @ts-ignore
     await new Promise((resolve, reject) => entry.createReader()
       .readEntries(entries => resolve(entries), error => reject(error))),
     getFileEntries))).flat()
@@ -128,6 +134,7 @@ export const getBook = async file => {
   if (file.isDirectory) {
     const loader = await makeDirectoryLoader(file)
     const { EPUB } = await import('foliate/epub.js')
+    // @ts-ignore
     book = await new EPUB(loader).init()
   }
   else if (!file.size) throw new Error('File not found')
@@ -144,6 +151,7 @@ export const getBook = async file => {
       book = await makeFB2(blob)
     } else {
       const { EPUB } = await import('foliate/epub.js')
+      // @ts-ignore
       book = await new EPUB(loader).init()
     }
   }
@@ -166,7 +174,7 @@ export const getBook = async file => {
 }
 
 export const mountBook = async (book, container) => {
-  const view = document.createElement('foliate-view')
+  const view = document.createElement('foliate-view') as IView
   container.append(view)
   await view.open(book)
   view.renderer.setAttribute('flow', 'scrolled')

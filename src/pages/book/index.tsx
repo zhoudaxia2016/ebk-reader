@@ -1,7 +1,7 @@
 import './index.less'
 import React from 'react'
 import iddb from '~/storage/iddb'
-import {getBook, mountBook} from '~/utils/reader'
+import {getBook, mountBook} from '~/utils/reader/reader'
 import {LeftOutlined, RightOutlined, HomeOutlined, EllipsisOutlined, SearchOutlined, BackwardOutlined, ForwardOutlined} from '@ant-design/icons'
 import {Button, Dropdown, Progress} from 'antd'
 import {EPUB} from '~/foliate-js/epub'

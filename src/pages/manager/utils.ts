@@ -1,5 +1,5 @@
 import {toArrayBuffer, toText} from '~/utils/fileReader'
-import {getBook} from '~/utils/reader'
+import {getBook} from '~/utils/reader/reader'
 import CryptoJS from 'crypto-js'
 import iddb from '~/storage/iddb'
 import {joinPath} from '~/utils/path'
