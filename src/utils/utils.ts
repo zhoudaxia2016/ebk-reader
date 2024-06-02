@@ -1,14 +1,15 @@
-import {toArrayBuffer} from '~/utils/fileReader'
-import {getBook} from '~/utils/reader'
-import iddb from '~/storage/iddb'
+import {toArrayBuffer, toText} from '~/utils/fileReader'
+import {getBook} from '~/utils/reader/reader'
 import CryptoJS from 'crypto-js'
+import iddb from '~/storage/iddb'
+import {joinPath} from '~/utils/path'
 
-function getMd5(data) {
+export function getMd5(data) {
   const hash = CryptoJS.MD5(CryptoJS.lib.WordArray.create(data))
   return hash.toString(CryptoJS.enc.Hex)
 }
 
-export const parseFileName = (name) => {
+export function parseFileName(name) {
   const match = /(.*)\.(\w+)$/.exec(name)
   if (match) {
     return {name: match[1], ext: match[2]}
@@ -16,7 +17,11 @@ export const parseFileName = (name) => {
   return {}
 }
 
-export const saveBooks = async (files, md5Set, isBuffer = false) => {
+export const saveBooks = async ({files, md5Set, isBuffer, onProgress}: {files: any[], md5Set: Set<string>, isBuffer?, onProgress?: (n: number) => void}) => {
+  isBuffer = isBuffer === undefined ? false : isBuffer
+  const total = files.length
+  let finishCount = 0
+  md5Set = new Set(md5Set)
   const result = await Promise.all(files.map(async file => {
     let data
     if (isBuffer) {
@@ -31,10 +36,22 @@ export const saveBooks = async (files, md5Set, isBuffer = false) => {
     if (md5Set.has(md5)) {
       return {name: file.name, isSuccess: false}
     }
-    const cover = await book.getCover()
+    md5Set.add(md5)
+    let cover = await book.getCover()
+    if (cover?.type === 'application/xhtml+xml') {
+      const coverHtml = await toText(cover)
+      const res = /<img[^>]*src=['"]([^>]+)['"][^>]+\/>/.exec(coverHtml)
+      const htmlPath = /(.*?)[^/]*$/.exec(book.resources.cover?.href)
+      if (res && htmlPath) {
+        const coverImgPath = joinPath(htmlPath[1], res[1])
+        cover = await book.loadBlob(coverImgPath)
+      }
+    }
     const createTime = Date.now()
     const id = await iddb.addBook(data, {createTime, cover, name: file.name, type: file.type, md5, ...book.metadata})
-    return {name: file.name, id, isSuccess: true}
+    finishCount++
+    onProgress?.(100 * finishCount / total)
+    return {name: file.name, id, isSuccess: true, md5}
   }))
   const successFiles = result.filter(_ => _.isSuccess)
   const failFiles = result.filter(_ => !_.isSuccess)

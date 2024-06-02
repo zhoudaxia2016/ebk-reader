@@ -1,7 +1,8 @@
-import {View} from 'foliate/view.js'
+import 'foliate/view'
 import {Paginator} from 'foliate/paginator'
+import type {View} from 'foliate/view'
 
-interface IView extends View {
+export interface IView extends View {
   renderer: Paginator,
 }
 

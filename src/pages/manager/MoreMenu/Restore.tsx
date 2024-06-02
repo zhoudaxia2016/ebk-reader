@@ -1,7 +1,7 @@
 import React, {useCallback, useRef} from 'react'
 import {Button} from 'antd'
 import {backupConfig} from './config'
-import {saveBooks} from '../utils'
+import {saveBooks} from '~/utils/utils'
 import {loadAsync} from 'jszip'
 import ProgressModal from '~/components/ProgressModal'
 import {bookUserInfoStorage} from '~/storage/localStorage'

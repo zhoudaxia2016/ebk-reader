@@ -1,16 +1,12 @@
 import './index.less'
 import React from 'react'
-import iddb from '~/storage/iddb'
-import {getBook, mountBook} from '~/utils/reader/reader'
+import Reader, {handleLaunchWithFile} from '~/utils/reader'
 import {LeftOutlined, RightOutlined, HomeOutlined, EllipsisOutlined, SearchOutlined, BackwardOutlined, ForwardOutlined} from '@ant-design/icons'
 import {Button, Dropdown, Progress} from 'antd'
 import {EPUB} from '~/foliate-js/epub'
 import Dir from './Dir'
 import Hammer from 'hammerjs'
-import {ObjectStorage} from '~/storage/localStorage'
 import color from '~/config/color'
-import {toArrayBuffer} from '~/utils/fileReader'
-import {getMd5, saveBooks} from '../manager/utils'
 import Search from './Search'
 
 interface IProps {
@@ -21,7 +17,6 @@ interface IProps {
 interface IState {
   sections: EPUB['sections'],
   sectionIndex: number,
-  view?: any,
   toc: any[],
   fullReader: boolean,
   fraction: number,
@@ -29,15 +24,13 @@ interface IState {
 }
 
 export default class Book extends React.Component<IProps, IState> {
-  private refReader = React.createRef<HTMLDivElement>()
+  private refReaderContainer = React.createRef<HTMLDivElement>()
   private book
   private id: number
   private hammer: Hammer
-  private bookUserInfo: ObjectStorage
   private startTouch: any
   private touchStartTime: number
-  private isSectionChanged = false
-  private isLoad = false
+  private reader: Reader
   public state: IState = {
     sections: [],
     sectionIndex: 0,
@@ -47,105 +40,39 @@ export default class Book extends React.Component<IProps, IState> {
     showSearch: false,
   }
 
-  private handleLaunchWithFile(): Promise<number | void> {
-    const {navigate} = this.props
-    return new Promise((res) => {
-      if ("launchQueue" in window) {
-        // @ts-ignore
-        window.launchQueue.setConsumer(async (launchParams) => {
-          const file = await launchParams.files[0]?.getFile()
-          if (!file) {
-            return res()
-          }
-          const data = await toArrayBuffer(file)
-          const md5 = getMd5(data)
-          const booksInfo = await iddb.getAllBookInfo()
-          const result = booksInfo.find(_ => _[1].md5 === md5)
-          let id
-          if (result) {
-            id = result[0]
-          } else {
-            const {successFiles} = await saveBooks({files: [file], md5Set: new Set()})
-            id = successFiles[0].id
-          }
-          navigate('/book?id=' + id)
-          res(id)
-        })
-      } else {
-        res()
-      }
-    })
-  }
-
   async componentDidMount() {
-    if (!this.refReader.current) {
+    if (!this.refReaderContainer.current) {
       return
     }
     const {searchParams} = this.props
     let id: number | void = Number(searchParams.get('id'))
     if (!id) {
-      id = await this.handleLaunchWithFile()
+      id = await handleLaunchWithFile()
+      this.props.navigate('/book?id=' + id)
     }
     if (!id) {
       alert('id 不存在')
       return
     }
-    this.bookUserInfo = new ObjectStorage({name: 'book-userinfo', id})
     this.id = id
-    const fraction = this.bookUserInfo.get('fraction') || 0
-    const data = await iddb.getBookData(id)
-    const info = await iddb.getBookInfo(id)
-    const blob = new File([data], info.name, {type: info.type})
-    const book: any = await getBook(blob)
-    this.refReader.current.innerText = ''
-    this.book = book
-    const view: any = await mountBook(book, this.refReader.current)
+    const reader = new Reader(id, this.handleRelocate, this.handleLoad)
+    await reader.init(this.refReaderContainer.current)
+    this.reader = reader
+    const fraction = reader.bookUserInfo.get('fraction')
     this.setState({
-      sections: book.sections,
-      toc: book.toc,
-      view,
+      sections: reader.book.sections,
+      toc: reader.book.toc,
       fraction,
     })
-    view.goToFraction(fraction).then(() => this.isLoad = true)
-    view.addEventListener('relocate', this.handleRelocate)
-    view.addEventListener('load', this.handleLoad)
-    document.addEventListener('visibilitychange', this.handleVisibilityChange)
   }
 
   componentWillUnmount() {
-    this.state.view?.removeEventListener('relocate', this.handleRelocate)
-    this.state.view?.removeEventListener('load', this.handleLoad)
-    this.state.view?.renderer.destroy()
-    document.removeEventListener('visibilitychange', this.handleVisibilityChange)
-    this.setAccessTime()
+    this.reader?.destroy()
+    this.reader = null
   }
 
-  private handleVisibilityChange = () => {
-    if (document.hidden) {
-      this.setAccessTime()
-    }
-  }
-
-  private setAccessTime() {
-    this.bookUserInfo?.set('accessTime', Date.now())
-  }
-
-  private handleRelocate = (e) => {
-    const {fraction} = e.detail
-    this.bookUserInfo.set('fraction', fraction)
+  private handleRelocate = ({fraction}) => {
     this.setState({fraction})
-    if (!this.isLoad) {
-      return
-    }
-    setTimeout(() => {
-      const {view} = this.state
-      if (this.isSectionChanged) {
-        view.history.pushState({fraction})
-      } else {
-        view.history.replaceState({fraction})
-      }
-      this.isSectionChanged = false
-    })
   }
 
   private handleTap = () => {
@@ -193,44 +120,35 @@ export default class Book extends React.Component<IProps, IState> {
     }
   }
 
-  private handleLoad = (e) => {
-    const {view} = this.state
-    const doc = e.detail.doc
-    if (/^\s+$/.test(doc.body.innerText)) {
-      view.renderer.setAttribute('gap', 0)
-    } else {
-      view.renderer.setAttribute('gap', 6)
-    }
+  private handleLoad = ({doc, index}) => {
     this.hammer?.off('tap', this.handleTap)
     this.hammer?.off('doubletap', this.handleDoubleTap)
     this.hammer = new Hammer(doc)
     this.hammer.on('tap', this.handleTap)
     this.hammer.on('doubletap', this.handleDoubleTap)
-    this.setState({sectionIndex: e.detail.index})
+    this.setState({sectionIndex: index})
     doc.addEventListener('touchstart', this.handleTouchStart)
     doc.addEventListener('touchend', this.handleTouchEnd)
   }
 
   private prev = () => {
-    this.isSectionChanged = true
-    this.state.view?.renderer.prevSection()
+    this.reader?.prev()
   }
 
   private next = () => {
-    this.isSectionChanged = true
-    this.state.view?.renderer.nextSection()
+    this.reader?.next()
   }
 
   private backward = () => {
-    this.state.view?.history.back()
+    this.reader?.backward()
   }
 
   private forward = () => {
-    this.state.view?.history.forward()
+    this.reader?.forward()
   }
 
   private goto = (href) => {
-    this.state.view?.goTo(href)
+    this.reader?.goto(href)
   }
 
   private handleBackHome = () => {
@@ -243,13 +161,14 @@ export default class Book extends React.Component<IProps, IState> {
   }
 
   render() {
-    const {fullReader, toc, fraction, showSearch, view} = this.state
+    const {fullReader, toc, fraction, showSearch} = this.state
     const title = this.book?.metadata.title
+    const reader = this.reader
 
     const menus = [
       {
         label: (
-          <Button type="text" disabled={!view?.history.canGoBack}>
+          <Button type="text" disabled={!reader?.view?.history.canGoBack}>
             <BackwardOutlined onClick={this.backward}/>
           </Button>
         ),
@@ -257,7 +176,7 @@ export default class Book extends React.Component<IProps, IState> {
       },
       {
         label: (
-          <Button type="text" disabled={!view?.history.canGoForward}>
+          <Button type="text" disabled={!reader?.view?.history.canGoForward}>
             <ForwardOutlined onClick={this.forward}/>
           </Button>
         ),
@@ -267,7 +186,7 @@ export default class Book extends React.Component<IProps, IState> {
 
     return (
       <div className="reader-wrapper">
-        <div className="reader" ref={this.refReader}></div>
+        <div className="reader" ref={this.refReaderContainer}></div>
         {
           !fullReader &&
           <div className="header">
@@ -279,7 +198,7 @@ export default class Book extends React.Component<IProps, IState> {
           !fullReader &&
           <div className="footer">
             <div className="footer-content">
-              {showSearch && <Search view={view}/>}
+              {showSearch && <Search view={reader?.view}/>}
             </div>
             <div className="footer-btns">
               <Dir toc={toc} goto={this.goto} title={title}/>
