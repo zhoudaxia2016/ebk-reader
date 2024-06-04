@@ -8,6 +8,7 @@ import Dir from './Dir'
 import Hammer from 'hammerjs'
 import color from '~/config/color'
 import Search from './Search'
+import iddb from '~/storage/iddb'
 
 interface IProps {
   searchParams: any,
@@ -23,6 +24,18 @@ interface IState {
   showSearch: boolean,
   pages?: number,
   page?: number,
+  selection?: {cfi: string, x: number, y: number, text: string},
+}
+
+interface INote {
+  id: number,
+  bookId: number,
+  sectionIndex: number,
+  cfi: string,
+  date: {year: number, month: number, day: number},
+  text: string,
+  view?: string,
+  color?: string,
 }
 
 export default class Book extends React.Component<IProps, IState> {
@@ -33,6 +46,7 @@ export default class Book extends React.Component<IProps, IState> {
   private startTouch: any
   private touchStartTime: number
   private reader: Reader
+  private notes: INote[] = []
   public state: IState = {
     sections: [],
     sectionIndex: 0,
@@ -57,7 +71,7 @@ export default class Book extends React.Component<IProps, IState> {
       return
     }
     this.id = id
-    const reader = new Reader(id, this.handleRelocate, this.handleLoad)
+    const reader = new Reader(id, this.handleRelocate, this.handleLoad, this.handleContextMenu)
     await reader.init(this.refReaderContainer.current)
     this.reader = reader
     const fraction = reader.bookUserInfo.get('fraction')
@@ -68,6 +82,7 @@ export default class Book extends React.Component<IProps, IState> {
       toc: reader.book.toc,
       fraction,
     })
+    this.loadNotes()
   }
 
   componentWillUnmount() {
@@ -75,6 +90,22 @@ export default class Book extends React.Component<IProps, IState> {
     this.reader?.view.removeEventListener('touchend', this.handleTouchEnd)
     this.reader?.destroy()
     this.reader = null
+  }
+
+  private async loadNotes() {
+    const notes = await iddb.getNotes() || []
+    this.notes = notes.map(([_, n]) => n).filter(_ => _.bookId === this.id)
+  }
+
+  private drawNotes(sectionIndex) {
+    const notes = this.notes.filter(_ => _.sectionIndex === sectionIndex)
+    notes.forEach(_ => {
+      this.reader.addAnnotation(_)
+    })
+  }
+
+  private handleContextMenu = (selection) => {
+    this.setState({selection})
   }
 
   private handleRelocate = ({fraction}) => {
@@ -136,6 +167,9 @@ export default class Book extends React.Component<IProps, IState> {
     this.setState({sectionIndex: index})
     doc.addEventListener('touchstart', this.handleTouchStart)
     doc.addEventListener('touchend', this.handleTouchEnd)
+    setTimeout(() => {
+      this.drawNotes(index)
+    })
   }
 
   private prev = () => {
@@ -167,8 +201,29 @@ export default class Book extends React.Component<IProps, IState> {
     this.setState({showSearch: !this.state.showSearch})
   }
 
+  private handleNote = () => {
+    const {cfi, text} = this.state.selection
+    const date = new Date()
+    const year = date.getUTCFullYear()
+    const month = date.getUTCMonth() + 1
+    const day = date.getUTCDate()
+    const note = {
+      id: Date.now(), bookId: this.id,
+      sectionIndex: this.state.sectionIndex,
+      cfi: cfi,
+      date: {year, month, day},
+      text,
+    }
+    iddb.addNote(note)
+    this.reader.addAnnotation(note)
+  }
+
+  private closeContextMenu = () => {
+    this.reader.closeContextMenu()
+  }
+
   render() {
-    const {fullReader, toc, fraction, showSearch, pages, page} = this.state
+    const {fullReader, toc, fraction, showSearch, pages, page, selection} = this.state
     const title = this.book?.metadata.title
     const reader = this.reader
 
@@ -222,6 +277,12 @@ export default class Book extends React.Component<IProps, IState> {
           <Dropdown className="book-more-dropdown" menu={{items: menus}} trigger={['click']}>
             <Button className="book-more-btn"><EllipsisOutlined/></Button>
           </Dropdown>
+        }
+        {
+          selection &&
+          <div className="context-menu" style={{left: selection.x, top: selection.y}} onClick={this.closeContextMenu}>
+            <div className="context-menu-item" onClick={this.handleNote}>标记</div>
+          </div>
         }
       </div>
     )

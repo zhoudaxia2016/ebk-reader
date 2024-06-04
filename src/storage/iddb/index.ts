@@ -3,14 +3,18 @@ import Db from './Db'
 enum STORE {
   bookData = 'bookData',
   bookInfo = 'bookInfo',
+  note = 'note',
 }
+
+const version = 2
 
 class EbkDb extends Db {
   constructor() {
     super('ebk-reader', [
       {name: STORE.bookData, opts: {autoIncrement: true}},
       {name: STORE.bookInfo, opts: {keyPath: 'id'}},
-    ])
+      {name: STORE.note, opts: {keyPath: 'id'}},
+    ], version)
   }
 
   async addBook(data, info) {
@@ -38,6 +42,18 @@ class EbkDb extends Db {
   deleteBook(id) {
     this.delete(STORE.bookData, id)
     this.delete(STORE.bookInfo, id)
+  }
+
+  getNotes() {
+    return this.getAll(STORE.note)
+  }
+
+  addNote(value) {
+    return this.add(STORE.note, value)
+  }
+
+  deleteNote(id) {
+    return this.delete(STORE.note, id)
   }
 }
 

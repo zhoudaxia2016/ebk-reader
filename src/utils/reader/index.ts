@@ -1,6 +1,8 @@
+import {Overlayer} from '~/foliate-js/overlayer'
 import iddb from '~/storage/iddb'
 import {ObjectStorage} from '~/storage/localStorage'
 import {toArrayBuffer} from '../fileReader'
+import {isMobile} from '~/utils/userAgent'
 import {getMd5, saveBooks} from '../utils'
 import {mountBook, getBook, IView} from './reader'
 
@@ -10,15 +12,19 @@ export default class Reader {
   public view: IView
   public book: any
 
+  private sectionIndex: number
   private isLoad = false
   private isSectionChanged = false
+  private doc: Document
   private onRelocate: (params: {fraction: number}) => void
   private onSectionLoad: (params: {index: number, doc: HTMLDocument}) => void
+  private onContextMenu: (params: {x: number, y: number, cfi: string, text: string}) => void
 
-  constructor(id, onRelocate, onSectionLoad) {
+  constructor(id, onRelocate, onSectionLoad, onContextMenu) {
     this.id = id
     this.onRelocate = onRelocate
     this.onSectionLoad = onSectionLoad
+    this.onContextMenu = onContextMenu
   }
 
   async getBook(id) {
@@ -44,6 +50,8 @@ export default class Reader {
     view.goToFraction(fraction).then(() => this.isLoad = true)
     view.addEventListener('relocate', this.handleRelocate)
     view.addEventListener('load', this.handleLoad)
+    view.addEventListener('draw-annotation', this.drawAnnotation)
+    view.addEventListener('show-annotation', this.handleShowAnnotation)
     document.addEventListener('visibilitychange', this.handleVisibilityChange)
   }
 
@@ -51,9 +59,20 @@ export default class Reader {
     const view = this.view
     view?.removeEventListener('relocate', this.handleRelocate)
     view?.removeEventListener('load', this.handleLoad)
+    view?.removeEventListener('draw-annotation', this.drawAnnotation)
+    view?.addEventListener('show-annotation', this.handleShowAnnotation)
     view?.renderer.destroy()
     document.removeEventListener('visibilitychange', this.handleVisibilityChange)
     this.setAccessTime()
+  }
+
+  private handleShowAnnotation = (e) => {
+  }
+
+  private drawAnnotation = (e) => {
+    const { draw, annotation } = e.detail
+    const { type = Overlayer.highlight } = annotation
+    draw(type, annotation)
   }
 
   private handleVisibilityChange = () => {
@@ -93,6 +112,37 @@ export default class Reader {
       view.renderer.setAttribute('gap', '6')
     }
     this.onSectionLoad(e.detail)
+    this.sectionIndex = e.detail.index
+    this.doc = doc
+    doc.addEventListener('selectionchange', this.handleSelectionChange)
+    doc.addEventListener('contextmenu', this.handleContextMenu)
+    doc.addEventListener('touchstart', this.closeContextMenu, true)
+  }
+
+  private handleContextMenu = (e) => {
+    e.preventDefault()
+  }
+
+  public closeContextMenu = () => {
+    this.onContextMenu(null)
+    this.doc.getSelection().empty()
+  }
+
+  private handleSelectionChange = (e) => {
+    const s = e.currentTarget.getSelection()
+    if (s.rangeCount === 0) {
+      this.closeContextMenu()
+      return
+    }
+    const range = s.getRangeAt(0)
+    const {x, y, width} = range.getBoundingClientRect()
+    if (width < 1) {
+      this.closeContextMenu()
+      return
+    }
+    const cfi = this.view.getCFI(this.sectionIndex, range)
+    const selection = {x, y: y - this.view.renderer.start - 10, cfi, text: s.toString()}
+    this.onContextMenu(selection)
   }
 
   public prev = () => {
@@ -115,6 +165,10 @@ export default class Reader {
 
   public goto = (href) => {
     this.view?.goTo(href)
+  }
+
+  public addAnnotation(val) {
+    this.view.addAnnotation({...val, value: val.cfi})
   }
 }
 

@@ -117,3 +117,21 @@
 .book-more-btn {
   .float-btn-br();
 }
+
+.context-menu {
+  display: flex;
+  align-items: center;
+  position: fixed;
+  padding: 0 10px;
+  height: 50px;
+  background: var(--fg1);
+  border-radius: 10px;
+  &-item {
+    color: var(--bg1);
+    padding: 5px;
+    user-select: none;
+    &:active {
+      opacity: 0.8;
+    }
+  }
+}

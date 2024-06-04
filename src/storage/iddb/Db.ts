@@ -6,13 +6,13 @@ interface IStoreConfig {
 abstract class Db {
   connection
 
-  constructor(name, storesConfig) {
-    this.open(name, storesConfig)
+  constructor(name, storesConfig, version?) {
+    this.open(name, storesConfig, version)
   }
 
-  protected open(name, storesConfig) {
+  protected open(name, storesConfig, version?) {
     this.connection = new Promise((res, rej) => {
-      const rq = window.indexedDB.open(name)
+      const rq = window.indexedDB.open(name, version)
       rq.onupgradeneeded = (e) => {
         // @ts-ignore
         const db = e.target.result
