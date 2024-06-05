@@ -38,8 +38,9 @@ function Manager() {
     refMd5Set.current = new Set(books.map(_ => _.md5))
   }
 
-  const handleClickImport = useCallback(() => {
+  const handleClickImport = useCallback((e: Event) => {
     refFileInput.current?.click()
+    e.stopPropagation()
   }, [])
 
   const handleFileChange = useCallback(async (e) => {
