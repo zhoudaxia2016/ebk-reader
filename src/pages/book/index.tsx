@@ -2,7 +2,7 @@ import './index.less'
 import React from 'react'
 import Reader, {handleLaunchWithFile} from '~/utils/reader'
 import {LeftOutlined, RightOutlined, HomeOutlined, EllipsisOutlined, SearchOutlined, BackwardOutlined, ForwardOutlined} from '@ant-design/icons'
-import {Button, Dropdown, Progress} from 'antd'
+import {Button, Dropdown, Progress, Input} from 'antd'
 import {EPUB} from '~/foliate-js/epub'
 import Dir from './Dir'
 import Hammer from 'hammerjs'
@@ -25,6 +25,7 @@ interface IState {
   pages?: number,
   page?: number,
   selection?: {cfi: string, x: number, y: number, text: string},
+  selectNote?: INote,
 }
 
 interface INote {
@@ -47,6 +48,7 @@ export default class Book extends React.Component<IProps, IState> {
   private touchStartTime: number
   private reader: Reader
   private notes: INote[] = []
+  private refNoteInput = React.createRef<any>()
   public state: IState = {
     sections: [],
     sectionIndex: 0,
@@ -71,7 +73,7 @@ export default class Book extends React.Component<IProps, IState> {
       return
     }
     this.id = id
-    const reader = new Reader(id, this.handleRelocate, this.handleLoad, this.handleContextMenu)
+    const reader = new Reader(id, this.handleRelocate, this.handleLoad, this.handleSelectionChange, this.handleReaderTouchStart)
     await reader.init(this.refReaderContainer.current)
     this.reader = reader
     const fraction = reader.bookUserInfo.get('fraction')
@@ -83,6 +85,19 @@ export default class Book extends React.Component<IProps, IState> {
       fraction,
     })
     this.loadNotes()
+  }
+
+  componentDidUpdate(_, prevState) {
+    if (!prevState.selectNote && this.state.selectNote) {
+      // TODO: 解决失焦问题，删除这段代码
+      setTimeout(() => {
+        this.refNoteInput.current?.focus()
+        const textArea = this.refNoteInput.current.resizableTextArea.textArea
+        const len = textArea.value.length
+        textArea.selectionStart = len
+        textArea.selectionEnd = len
+      }, 50)
+    }
   }
 
   componentWillUnmount() {
@@ -104,7 +119,11 @@ export default class Book extends React.Component<IProps, IState> {
     })
   }
 
-  private handleContextMenu = (selection) => {
+  private handleReaderTouchStart = () => {
+    this.setState({selection: null, selectNote: null})
+  }
+
+  private handleSelectionChange = (selection) => {
     this.setState({selection})
   }
 
@@ -113,7 +132,13 @@ export default class Book extends React.Component<IProps, IState> {
     this.setState({fraction, pages, page: page + 1})
   }
 
-  private handleTap = () => {
+  private handleTap = (e) => {
+    const [value] = this.reader.hitTest(e.srcEvent)
+    if (value) {
+      const selectNote = this.notes.find(_ => _.cfi === value)
+      this.setState({selectNote})
+      return
+    }
     const {fullReader, showSearch} = this.state
     this.setState({fullReader: !fullReader, showSearch: showSearch && !fullReader})
   }
@@ -216,14 +241,32 @@ export default class Book extends React.Component<IProps, IState> {
     }
     iddb.addNote(note)
     this.reader.addAnnotation(note)
+    this.loadNotes()
   }
 
   private closeContextMenu = () => {
-    this.reader.closeContextMenu()
+    this.reader.clearSelection()
+  }
+
+  private deleteNote = async () => {
+    const {selectNote} = this.state
+    this.reader.addAnnotation(selectNote, true)
+    this.setState({selectNote: null})
+    await iddb.deleteNote(selectNote.id)
+    this.loadNotes()
+  }
+
+  private publishNote = () => {
+    const {selectNote} = this.state
+    selectNote.view = this.refNoteInput.current.resizableTextArea.textArea.value
+    iddb.updateNote(selectNote)
+    const i = this.notes.findIndex(_ => _.id === selectNote.id)
+    this.notes[i] = selectNote
+    this.setState({selectNote: null})
   }
 
   render() {
-    const {fullReader, toc, fraction, showSearch, pages, page, selection} = this.state
+    const {fullReader, toc, fraction, showSearch, pages, page, selection, selectNote} = this.state
     const title = this.book?.metadata.title
     const reader = this.reader
 
@@ -282,6 +325,16 @@ export default class Book extends React.Component<IProps, IState> {
           selection &&
           <div className="context-menu" style={{left: selection.x, top: selection.y}} onClick={this.closeContextMenu}>
             <div className="context-menu-item" onClick={this.handleNote}>标记</div>
+          </div>
+        }
+        {
+          selectNote &&
+          <div className="book-note">
+            <div className="book-note-btns">
+              <Button type="text" onClick={this.deleteNote}>删除</Button>
+              <Button type="text" onClick={this.publishNote}>发表</Button>
+            </div>
+            <Input.TextArea ref={this.refNoteInput} defaultValue={selectNote.view}/>
           </div>
         }
       </div>

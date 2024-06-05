@@ -18,13 +18,15 @@ export default class Reader {
   private doc: Document
   private onRelocate: (params: {fraction: number}) => void
   private onSectionLoad: (params: {index: number, doc: HTMLDocument}) => void
-  private onContextMenu: (params: {x: number, y: number, cfi: string, text: string}) => void
+  private onTouchStart: () => void
+  private onSelectionChange: (selection: {x: number, y: number, cfi: string}) => void
 
-  constructor(id, onRelocate, onSectionLoad, onContextMenu) {
+  constructor(id, onRelocate, onSectionLoad, onSelectionChange, onTouchStart) {
     this.id = id
     this.onRelocate = onRelocate
     this.onSectionLoad = onSectionLoad
-    this.onContextMenu = onContextMenu
+    this.onSelectionChange = onSelectionChange
+    this.onTouchStart = onTouchStart
   }
 
   async getBook(id) {
@@ -51,7 +53,6 @@ export default class Reader {
     view.addEventListener('relocate', this.handleRelocate)
     view.addEventListener('load', this.handleLoad)
     view.addEventListener('draw-annotation', this.drawAnnotation)
-    view.addEventListener('show-annotation', this.handleShowAnnotation)
     document.addEventListener('visibilitychange', this.handleVisibilityChange)
   }
 
@@ -60,13 +61,9 @@ export default class Reader {
     view?.removeEventListener('relocate', this.handleRelocate)
     view?.removeEventListener('load', this.handleLoad)
     view?.removeEventListener('draw-annotation', this.drawAnnotation)
-    view?.addEventListener('show-annotation', this.handleShowAnnotation)
     view?.renderer.destroy()
     document.removeEventListener('visibilitychange', this.handleVisibilityChange)
     this.setAccessTime()
-  }
-
-  private handleShowAnnotation = (e) => {
   }
 
   private drawAnnotation = (e) => {
@@ -116,33 +113,41 @@ export default class Reader {
     this.doc = doc
     doc.addEventListener('selectionchange', this.handleSelectionChange)
     doc.addEventListener('contextmenu', this.handleContextMenu)
-    doc.addEventListener('touchstart', this.closeContextMenu, true)
+    doc.addEventListener('touchstart', this.handleTouchStart, true)
   }
 
   private handleContextMenu = (e) => {
     e.preventDefault()
   }
 
-  public closeContextMenu = () => {
-    this.onContextMenu(null)
+  public clearSelection() {
     this.doc.getSelection().empty()
+  }
+
+  private handleTouchStart = () => {
+    this.onTouchStart()
+    this.clearSelection()
   }
 
   private handleSelectionChange = (e) => {
     const s = e.currentTarget.getSelection()
+    const closeContextMenu = () => {
+      this.onSelectionChange(null)
+      this.clearSelection()
+    }
     if (s.rangeCount === 0) {
-      this.closeContextMenu()
+      closeContextMenu()
       return
     }
     const range = s.getRangeAt(0)
     const {x, y, width} = range.getBoundingClientRect()
     if (width < 1) {
-      this.closeContextMenu()
+      closeContextMenu()
       return
     }
     const cfi = this.view.getCFI(this.sectionIndex, range)
     const selection = {x, y: y - this.view.renderer.start - 10, cfi, text: s.toString()}
-    this.onContextMenu(selection)
+    this.onSelectionChange(selection)
   }
 
   public prev = () => {
@@ -167,8 +172,18 @@ export default class Reader {
     this.view?.goTo(href)
   }
 
-  public addAnnotation(val) {
-    this.view.addAnnotation({...val, value: val.cfi})
+  public addAnnotation(val, remove?) {
+    this.view.addAnnotation({...val, value: val.cfi}, remove)
+  }
+
+  private getOverlayer() {
+    return this.view.renderer.getContents()
+      .find(x => x.index === this.sectionIndex && x.overlayer)
+  }
+
+  public hitTest(e) {
+    const {overlayer} = this.getOverlayer()
+    return overlayer.hitTest(e)
   }
 }
 

@@ -39,6 +39,18 @@ abstract class Db {
     })
   }
 
+  update(storeName, data) {
+    return new Promise(res => {
+      this.connection.then(db => {
+        const store = db.transaction(storeName, 'readwrite').objectStore(storeName)
+        const rq = store.put(data)
+        rq.onsuccess = (e) => {
+          res(e.target.result)
+        }
+      })
+    })
+  }
+
   // TODO 完善type
   get(storeName, key): any {
     return new Promise(res => {

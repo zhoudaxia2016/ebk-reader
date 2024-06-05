@@ -55,6 +55,10 @@ class EbkDb extends Db {
   deleteNote(id) {
     return this.delete(STORE.note, id)
   }
+
+  updateNote(value) {
+    return this.update(STORE.note, value)
+  }
 }
 
 export default new EbkDb()
