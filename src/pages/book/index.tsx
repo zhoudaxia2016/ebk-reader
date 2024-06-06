@@ -31,7 +31,7 @@ interface IState {
   page?: number,
   selection?: {cfi: string, x: number, y: number, text: string},
   selectNote?: INote,
-  btModal?: BT_MODAL | '',
+  btModal?: BT_MODAL | -1,
 }
 
 interface INote {
@@ -146,7 +146,7 @@ export default class Book extends React.Component<IProps, IState> {
     }
     let {fullReader, btModal} = this.state
     if (fullReader) {
-      btModal = ''
+      btModal = -1
     }
     this.setState({fullReader: !fullReader, btModal})
   }
@@ -172,7 +172,7 @@ export default class Book extends React.Component<IProps, IState> {
   private handleTouchStart = (e) => {
     this.startTouch = e.changedTouches[0]
     this.touchStartTime = e.timeStamp
-    this.setState({btModal: ''})
+    this.setState({btModal: -1})
   }
   private handleTouchEnd = (e) => {
     if (e.timeStamp - this.touchStartTime > 200) {
@@ -233,7 +233,7 @@ export default class Book extends React.Component<IProps, IState> {
 
   private toggleSearch = () => {
     let {btModal} = this.state
-    btModal = btModal ? '' : BT_MODAL.search
+    btModal = btModal === BT_MODAL.search ? -1 : BT_MODAL.search
     this.setState({btModal})
   }
 
@@ -278,7 +278,7 @@ export default class Book extends React.Component<IProps, IState> {
 
   private toggleShowNotes = () => {
     let {btModal} = this.state
-    btModal = btModal ? '' : BT_MODAL.note
+    btModal = btModal === BT_MODAL.note ? -1 : BT_MODAL.note
     this.setState({btModal})
   }
 

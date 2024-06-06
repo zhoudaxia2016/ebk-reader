@@ -40,8 +40,11 @@ export default class Search extends React.PureComponent<IProps, IState> {
   }
 
   private handleChange = debounce(async ({target: {value}}) => {
-    if (this.state.isComp || !value) {
+    if (this.state.isComp) {
       return
+    }
+    if (!value) {
+      this.setState({filterNotes: null})
     }
     let {notes} = this.props
     notes = notes.filter(_ => _.text.includes(value))
