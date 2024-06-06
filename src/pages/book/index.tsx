@@ -2,7 +2,7 @@ import './index.less'
 import React from 'react'
 import Reader, {handleLaunchWithFile} from '~/utils/reader'
 import {LeftOutlined, RightOutlined, HomeOutlined, EllipsisOutlined, SearchOutlined, BackwardOutlined, ForwardOutlined, EditOutlined, EnterOutlined} from '@ant-design/icons'
-import {Button, Dropdown, Progress, Input, InputRef} from 'antd'
+import {Button, Dropdown, Progress, Input, InputRef, Tooltip} from 'antd'
 import {EPUB} from '~/foliate-js/epub'
 import Dir from './Dir'
 import Hammer from 'hammerjs'
@@ -10,6 +10,7 @@ import color from '~/config/color'
 import Search from './Search'
 import iddb from '~/storage/iddb'
 import Notes from './Notes'
+import {noteColors} from './config'
 
 interface IProps {
   searchParams: any,
@@ -245,6 +246,7 @@ export default class Book extends React.Component<IProps, IState> {
       cfi: cfi,
       date: {year, month, day},
       text,
+      color: noteColors[0],
     }
     iddb.addNote(note)
     this.reader.addAnnotation(note)
@@ -276,6 +278,23 @@ export default class Book extends React.Component<IProps, IState> {
     let {btModal} = this.state
     btModal = btModal === BT_MODAL.note ? -1 : BT_MODAL.note
     this.setState({btModal})
+  }
+
+  private setNoteColor = (c) => {
+    const {selectNote} = this.state
+    selectNote.color = c
+    iddb.updateNote(selectNote)
+    const i = this.notes.findIndex(_ => _.id === selectNote.id)
+    this.notes[i] = selectNote
+    this.setState({selectNote: null})
+    this.reader.addAnnotation(selectNote)
+  }
+
+  private renderColorOptions() {
+    const colors = noteColors.map(c => (
+      <div className="note-color-item" style={{background: c}} onClick={() => this.setNoteColor(c)}></div>
+    ))
+    return <div className="note-colors">{colors}</div>
   }
 
   render() {
@@ -358,7 +377,12 @@ export default class Book extends React.Component<IProps, IState> {
               </div>
             </div>
             <Input ref={this.refNoteInput} defaultValue={selectNote.view} suffix={
-              <Button type="text" onClick={this.publishNote}><EnterOutlined/></Button>}/>
+              <>
+                <Tooltip placement="top" title={this.renderColorOptions()}>
+                  <div className="note-color-btn" style={{background: selectNote.color}}></div>
+                </Tooltip>
+                <Button type="text" onClick={this.publishNote}><EnterOutlined/></Button>
+              </>}/>
           </div>
         }
       </div>

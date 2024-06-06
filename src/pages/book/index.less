@@ -146,6 +146,13 @@
     padding-left: 0;
     padding-right: 0;
   }
+  .note-color-item,
+  .note-color-btn {
+    width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    background: #de907b;
+  }
   &::after {
     content: '';
     position: absolute;
@@ -173,5 +180,15 @@
     &:active {
       opacity: 0.8;
     }
+  }
+}
+
+.note-colors {
+  display: flex;
+  gap: 10px;
+  .note-color-item {
+    width: 30px;
+    height: 30px;
+    border-radius: 15px;
   }
 }
