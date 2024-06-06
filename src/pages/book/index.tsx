@@ -1,8 +1,8 @@
 import './index.less'
 import React from 'react'
 import Reader, {handleLaunchWithFile} from '~/utils/reader'
-import {LeftOutlined, RightOutlined, HomeOutlined, EllipsisOutlined, SearchOutlined, BackwardOutlined, ForwardOutlined, EditOutlined} from '@ant-design/icons'
-import {Button, Dropdown, Progress, Input} from 'antd'
+import {LeftOutlined, RightOutlined, HomeOutlined, EllipsisOutlined, SearchOutlined, BackwardOutlined, ForwardOutlined, EditOutlined, EnterOutlined} from '@ant-design/icons'
+import {Button, Dropdown, Progress, Input, InputRef} from 'antd'
 import {EPUB} from '~/foliate-js/epub'
 import Dir from './Dir'
 import Hammer from 'hammerjs'
@@ -54,7 +54,7 @@ export default class Book extends React.Component<IProps, IState> {
   private touchStartTime: number
   private reader: Reader
   private notes: INote[] = []
-  private refNoteInput = React.createRef<any>()
+  private refNoteInput = React.createRef<InputRef>()
   public state: IState = {
     sections: [],
     sectionIndex: 0,
@@ -97,10 +97,6 @@ export default class Book extends React.Component<IProps, IState> {
       // TODO: 解决失焦问题，删除这段代码
       setTimeout(() => {
         this.refNoteInput.current?.focus()
-        const textArea = this.refNoteInput.current.resizableTextArea.textArea
-        const len = textArea.value.length
-        textArea.selectionStart = len
-        textArea.selectionEnd = len
       }, 50)
     }
   }
@@ -269,7 +265,7 @@ export default class Book extends React.Component<IProps, IState> {
 
   private publishNote = () => {
     const {selectNote} = this.state
-    selectNote.view = this.refNoteInput.current.resizableTextArea.textArea.value
+    selectNote.view = this.refNoteInput.current.input.value
     iddb.updateNote(selectNote)
     const i = this.notes.findIndex(_ => _.id === selectNote.id)
     this.notes[i] = selectNote
@@ -354,12 +350,15 @@ export default class Book extends React.Component<IProps, IState> {
         }
         {
           selectNote &&
-          <div className="book-note">
-            <div className="book-note-btns">
-              <Button type="text" onClick={this.deleteNote}>删除</Button>
-              <Button type="text" onClick={this.publishNote}>发表</Button>
+          <div className="note-modal">
+            <div className="note-modal-header">
+              <div className="note-modal-text">{selectNote.text}</div>
+              <div className="note-modal-btns">
+                <Button type="text" onClick={this.deleteNote}>删除</Button>
+              </div>
             </div>
-            <Input.TextArea ref={this.refNoteInput} defaultValue={selectNote.view}/>
+            <Input ref={this.refNoteInput} defaultValue={selectNote.view} suffix={
+              <Button type="text" onClick={this.publishNote}><EnterOutlined/></Button>}/>
           </div>
         }
       </div>
