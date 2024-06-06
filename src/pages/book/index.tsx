@@ -1,7 +1,7 @@
 import './index.less'
 import React from 'react'
 import Reader, {handleLaunchWithFile} from '~/utils/reader'
-import {LeftOutlined, RightOutlined, HomeOutlined, EllipsisOutlined, SearchOutlined, BackwardOutlined, ForwardOutlined} from '@ant-design/icons'
+import {LeftOutlined, RightOutlined, HomeOutlined, EllipsisOutlined, SearchOutlined, BackwardOutlined, ForwardOutlined, EditOutlined} from '@ant-design/icons'
 import {Button, Dropdown, Progress, Input} from 'antd'
 import {EPUB} from '~/foliate-js/epub'
 import Dir from './Dir'
@@ -9,10 +9,16 @@ import Hammer from 'hammerjs'
 import color from '~/config/color'
 import Search from './Search'
 import iddb from '~/storage/iddb'
+import Notes from './Notes'
 
 interface IProps {
   searchParams: any,
   navigate: any,
+}
+
+enum BT_MODAL {
+  note,
+  search,
 }
 
 interface IState {
@@ -21,11 +27,11 @@ interface IState {
   toc: any[],
   fullReader: boolean,
   fraction: number,
-  showSearch: boolean,
   pages?: number,
   page?: number,
   selection?: {cfi: string, x: number, y: number, text: string},
   selectNote?: INote,
+  btModal?: BT_MODAL | '',
 }
 
 interface INote {
@@ -55,7 +61,6 @@ export default class Book extends React.Component<IProps, IState> {
     toc: [],
     fullReader: true,
     fraction: 0,
-    showSearch: false,
   }
 
   async componentDidMount() {
@@ -139,8 +144,11 @@ export default class Book extends React.Component<IProps, IState> {
       this.setState({selectNote})
       return
     }
-    const {fullReader, showSearch} = this.state
-    this.setState({fullReader: !fullReader, showSearch: showSearch && !fullReader})
+    let {fullReader, btModal} = this.state
+    if (fullReader) {
+      btModal = ''
+    }
+    this.setState({fullReader: !fullReader, btModal})
   }
 
   private handleDoubleTap = () => {
@@ -164,6 +172,7 @@ export default class Book extends React.Component<IProps, IState> {
   private handleTouchStart = (e) => {
     this.startTouch = e.changedTouches[0]
     this.touchStartTime = e.timeStamp
+    this.setState({btModal: ''})
   }
   private handleTouchEnd = (e) => {
     if (e.timeStamp - this.touchStartTime > 200) {
@@ -223,7 +232,9 @@ export default class Book extends React.Component<IProps, IState> {
   }
 
   private toggleSearch = () => {
-    this.setState({showSearch: !this.state.showSearch})
+    let {btModal} = this.state
+    btModal = btModal ? '' : BT_MODAL.search
+    this.setState({btModal})
   }
 
   private handleNote = () => {
@@ -265,8 +276,14 @@ export default class Book extends React.Component<IProps, IState> {
     this.setState({selectNote: null})
   }
 
+  private toggleShowNotes = () => {
+    let {btModal} = this.state
+    btModal = btModal ? '' : BT_MODAL.note
+    this.setState({btModal})
+  }
+
   render() {
-    const {fullReader, toc, fraction, showSearch, pages, page, selection, selectNote} = this.state
+    const {fullReader, toc, fraction, btModal, pages, page, selection, selectNote} = this.state
     const title = this.book?.metadata.title
     const reader = this.reader
 
@@ -289,6 +306,9 @@ export default class Book extends React.Component<IProps, IState> {
       },
     ]
 
+    const showSearch = btModal === BT_MODAL.search
+    const showNotes = btModal === BT_MODAL.note
+
     return (
       <div className="reader-wrapper">
         <div className="reader" ref={this.refReaderContainer}></div>
@@ -304,10 +324,15 @@ export default class Book extends React.Component<IProps, IState> {
           <div className="footer">
             <div className="footer-content">
               {showSearch && <Search view={reader?.view}/>}
+              {
+                showNotes &&
+                <Notes notes={this.notes} goto={this.goto}/>
+              }
             </div>
             <div className="footer-btns">
               <Dir toc={toc} goto={this.goto} title={title}/>
               <Button className="search" type="text" size="large" icon={<SearchOutlined/>} onClick={this.toggleSearch}></Button>
+              <Button type="text" size="large" icon={<EditOutlined />} onClick={this.toggleShowNotes}></Button>
               <Progress className="reader-progress" type="circle" size="small" percent={Math.round(fraction * 100)}
                   strokeColor={color.pr2} format={() => page && `${page}/${pages}`}/>
               <Button className="prev" type="text" size="large" icon={<LeftOutlined/>} disabled={this.isPrevDisabled()} onClick={this.prev}></Button>
