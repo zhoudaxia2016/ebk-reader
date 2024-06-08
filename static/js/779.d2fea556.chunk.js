@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkclient=self.webpackChunkclient||[]).push([[779],{2779:(e,t,s)=>{e.exports=s.p+"static/media/tree-sitter-rust.e6e11980a1e3a000365e.wasm"}}]);

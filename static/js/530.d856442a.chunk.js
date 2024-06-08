@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkclient=self.webpackChunkclient||[]).push([[530],{8530:(e,t,s)=>{e.exports=s.p+"static/media/tree-sitter-typescript.f2d243a5df3ae54ce109.wasm"}}]);

@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkclient=self.webpackChunkclient||[]).push([[694],{1694:(e,t,c)=>{e.exports=c.p+"static/media/tree-sitter-c.5917dc10b1cb6a39b56e.wasm"}}]);
