@@ -195,6 +195,7 @@ export default class Book extends React.Component<IProps, IState> {
     this.hammer = new Hammer(doc)
     this.hammer.on('tap', this.handleTap)
     this.hammer.on('doubletap', this.handleDoubleTap)
+    this.hammer.get('pan').set({ enable: false })
     this.setState({sectionIndex: index})
     doc.addEventListener('touchstart', this.handleTouchStart)
     doc.addEventListener('touchend', this.handleTouchEnd)
