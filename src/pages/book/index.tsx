@@ -300,7 +300,7 @@ export default class Book extends React.Component<IProps, IState> {
 
   render() {
     const {fullReader, toc, fraction, btModal, pages, page, selection, selectNote} = this.state
-    const title = this.book?.metadata.title
+    const title = this.reader?.book?.metadata.title
     const reader = this.reader
 
     const menus = [
