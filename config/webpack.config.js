@@ -481,6 +481,7 @@ module.exports = function (webpackEnv) {
             {
               test: cssRegex,
               exclude: cssModuleRegex,
+              resourceQuery: { not: [/raw/] },
               use: getStyleLoaders({
                 importLoaders: 1,
                 sourceMap: isEnvProduction
@@ -564,6 +565,15 @@ module.exports = function (webpackEnv) {
             // ** STOP ** Are you adding a new loader?
             // Make sure to add the new loader(s) before the "file" loader.
           ],
+        },
+        {
+          test: /\.css$/,
+          resourceQuery: /raw/,
+          type: 'asset/source',
+        },
+        {
+          test: /\.scm$/,
+          type: 'asset/source',
         },
       ].filter(Boolean),
     },

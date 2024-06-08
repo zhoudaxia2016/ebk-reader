@@ -67,67 +67,18 @@ const isFBZ = ({ name, type }) =>
   type === 'application/x-zip-compressed-fb2'
     || name.endsWith('.fb2.zip') || name.endsWith('.fbz')
 
-const getCSS = ({ justify, hyphenate }) => `
-@namespace epub "http://www.idpf.org/2007/ops";
-html {
-color-scheme: light dark;
-}
-/* https://github.com/whatwg/html/issues/5426 */
-@media (prefers-color-scheme: dark) {
-a:link {
-color: lightblue;
-}
-}
-a, p, li, blockquote, dd, div {
-text-align: ${justify ? 'justify' : 'start'};
--webkit-hyphens: ${hyphenate ? 'auto' : 'manual'};
-hyphens: ${hyphenate ? 'auto' : 'manual'};
--webkit-hyphenate-limit-before: 3;
--webkit-hyphenate-limit-after: 2;
--webkit-hyphenate-limit-lines: 2;
-hanging-punctuation: allow-end last;
-widows: 2;
-font-size: 19px !important;
-line-height: 1.8 !important;
-margin-top: 0 !important;
-margin-bottom: 10px !important;
-color: #212832 !important;
-}
-
-p:has(> img),
-div:has(> img) {
-  overflow-x: auto;
-}
-/* prevent the above from overriding the align attribute */
-[align="left"] { text-align: left; }
-[align="right"] { text-align: right; }
-[align="center"] { text-align: center; }
-[align="justify"] { text-align: justify; }
-
-h1, h2, h3, h4, h5, h6 {
-  text-indent: 0;
-}
-
-pre {
-white-space: pre-wrap !important;
-}
-aside[epub|type~="endnote"],
-aside[epub|type~="footnote"],
-aside[epub|type~="note"],
-aside[epub|type~="rearnote"] {
-display: none;
-}
-
-img {
-  position: unset;
-  height: fit-content;
-  width: 100%;
-}
-`
-
-const style = {
-  justify: true,
-  hyphenate: true,
+const styleFiles = ['default']
+const styleCache = {}
+const getCSS = async () => {
+  const styles = await Promise.all(styleFiles.map(async f => {
+    if (styleCache[f]) {
+      return styleCache[f]
+    }
+    const style = (await import(`./styles/${f}.css?raw`)).default
+    styleCache[f] = style
+    return style
+  }))
+  return styles.join('\n')
 }
 
 export const getBook = async file => {
@@ -179,7 +130,8 @@ export const mountBook = async (book, container) => {
   container.append(view)
   await view.open(book)
   view.renderer.setAttribute('flow', 'scrolled')
-  view.renderer.setStyles?.(getCSS(style))
+  const defaultCSS = await getCSS()
+  view.renderer.setStyles?.(defaultCSS)
   const title = book.metadata?.title ?? 'Untitled Book'
   document.title = title
   return view
