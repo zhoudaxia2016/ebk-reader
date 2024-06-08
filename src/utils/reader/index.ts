@@ -19,6 +19,7 @@ export default class Reader {
   private onRelocate: (params: {fraction: number}) => void
   private onSectionLoad: (params: {index: number, doc: HTMLDocument}) => void
   private onSelectionChange: (selection: {x: number, y: number, cfi: string}) => void
+  private observer: IntersectionObserver
 
   constructor(id, onRelocate, onSectionLoad, onSelectionChange) {
     this.id = id
@@ -52,6 +53,7 @@ export default class Reader {
     view.addEventListener('load', this.handleLoad)
     view.addEventListener('draw-annotation', this.drawAnnotation)
     document.addEventListener('visibilitychange', this.handleVisibilityChange)
+    this.observer = new IntersectionObserver(this.handleCodeBlock)
   }
 
   public destroy() {
@@ -62,6 +64,7 @@ export default class Reader {
     view?.renderer.destroy()
     document.removeEventListener('visibilitychange', this.handleVisibilityChange)
     this.setAccessTime()
+    this.observer.disconnect()
   }
 
   private drawAnnotation = (e) => {
@@ -98,21 +101,24 @@ export default class Reader {
     })
   }
 
-  private initHl(doc) {
+  private async initHl(dom) {
+    const adjusted = await highlight(dom.innerText)
+    try {
+      dom.innerHTML = adjusted
+    } catch (err) {
+    }
+  }
+
+  private observeCodeBlock(doc) {
     const codeDoms = doc.querySelectorAll('pre code')
-    Array.from(codeDoms).forEach(async (dom: HTMLElement, i) => {
-      const adjusted = await highlight(dom.innerText)
-      try {
-        dom.innerHTML = adjusted
-      } catch (err) {
-      }
+    Array.from(codeDoms).forEach((dom: HTMLElement) => {
+      this.observer.observe(dom)
     })
   }
 
   private handleLoad = (e) => {
     const view = this.view
     const doc = e.detail.doc
-    this.initHl(doc)
     if (/^\s+$/.test(doc.body.innerText)) {
       view.renderer.setAttribute('gap', '0')
     } else {
@@ -124,6 +130,16 @@ export default class Reader {
     doc.addEventListener('selectionchange', this.handleSelectionChange)
     doc.addEventListener('contextmenu', this.handleContextMenu)
     doc.addEventListener('touchstart', this.handleTouchStart, true)
+    this.observeCodeBlock(doc)
+  }
+
+  private handleCodeBlock: IntersectionObserverCallback = (entries) => {
+    for (const item of entries) {
+      if (item.isIntersecting) {
+        this.initHl(item.target)
+        this.observer.unobserve(item.target)
+      }
+    }
   }
 
   private handleContextMenu = (e) => {
