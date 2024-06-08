@@ -1,0 +1,36 @@
+pre {
+  background: #2e3440;
+}
+pre code {
+  color: #d8dee9;
+}
+/** TODO: 使用less*/
+code .property {
+  color: #5e81ac;
+}
+code .string {
+  color: #a3be8c;
+}
+code .function\.call,
+code .punctuation\.bracket,
+code .punctuation\.delimiter {
+  color: #88c0d0;
+}
+code .keyword\.repeat,
+code .keyword\.operator,
+code .keyword\.return,
+code .function,
+code .operator,
+code .keyword,
+code .keyword\.function {
+  color: #81a1c1;
+}
+code .number {
+  color: #b48ead;
+}
+code .variable {
+  color: #d8dee9;
+}
+code .comment {
+  color: #616e88;
+}

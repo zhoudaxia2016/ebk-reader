@@ -2,9 +2,9 @@ import {Overlayer} from '~/foliate-js/overlayer'
 import iddb from '~/storage/iddb'
 import {ObjectStorage} from '~/storage/localStorage'
 import {toArrayBuffer} from '../fileReader'
-import {isMobile} from '~/utils/userAgent'
 import {getMd5, saveBooks} from '../utils'
 import {mountBook, getBook, IView} from './reader'
+import highlight from './highlight'
 
 export default class Reader {
   public bookUserInfo: ObjectStorage
@@ -98,9 +98,21 @@ export default class Reader {
     })
   }
 
+  private initHl(doc) {
+    const codeDoms = doc.querySelectorAll('pre code')
+    Array.from(codeDoms).forEach(async (dom: HTMLElement, i) => {
+      const adjusted = await highlight(dom.innerText)
+      try {
+        dom.innerHTML = adjusted
+      } catch (err) {
+      }
+    })
+  }
+
   private handleLoad = (e) => {
     const view = this.view
     const doc = e.detail.doc
+    this.initHl(doc)
     if (/^\s+$/.test(doc.body.innerText)) {
       view.renderer.setAttribute('gap', '0')
     } else {

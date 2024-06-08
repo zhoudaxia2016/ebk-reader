@@ -67,7 +67,7 @@ const isFBZ = ({ name, type }) =>
   type === 'application/x-zip-compressed-fb2'
     || name.endsWith('.fb2.zip') || name.endsWith('.fbz')
 
-const styleFiles = ['default']
+const styleFiles = ['default', 'highlight']
 const styleCache = {}
 const getCSS = async () => {
   const styles = await Promise.all(styleFiles.map(async f => {
