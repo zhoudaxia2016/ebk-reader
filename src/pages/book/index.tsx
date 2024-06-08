@@ -79,7 +79,7 @@ export default class Book extends React.Component<IProps, IState> {
       return
     }
     this.id = id
-    const reader = new Reader(id, this.handleRelocate, this.handleLoad, this.handleSelectionChange, this.handleReaderTouchStart)
+    const reader = new Reader(id, this.handleRelocate, this.handleLoad, this.handleSelectionChange)
     await reader.init(this.refReaderContainer.current)
     this.reader = reader
     const fraction = reader.bookUserInfo.get('fraction')
@@ -121,10 +121,6 @@ export default class Book extends React.Component<IProps, IState> {
     })
   }
 
-  private handleReaderTouchStart = () => {
-    this.setState({selection: null, selectNote: null})
-  }
-
   private handleSelectionChange = (selection) => {
     this.setState({selection})
   }
@@ -138,10 +134,14 @@ export default class Book extends React.Component<IProps, IState> {
     const [value] = this.reader.hitTest(e.srcEvent)
     if (value) {
       const selectNote = this.notes.find(_ => _.cfi === value)
-      this.setState({selectNote})
+      this.setState({selectNote, fullReader: true})
       return
     }
-    let {fullReader, btModal} = this.state
+    let {selectNote, fullReader, btModal} = this.state
+    if (selectNote) {
+      this.setState({fullReader: true, selectNote: null})
+      return
+    }
     if (fullReader) {
       btModal = -1
     }

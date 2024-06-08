@@ -18,15 +18,13 @@ export default class Reader {
   private doc: Document
   private onRelocate: (params: {fraction: number}) => void
   private onSectionLoad: (params: {index: number, doc: HTMLDocument}) => void
-  private onTouchStart: () => void
   private onSelectionChange: (selection: {x: number, y: number, cfi: string}) => void
 
-  constructor(id, onRelocate, onSectionLoad, onSelectionChange, onTouchStart) {
+  constructor(id, onRelocate, onSectionLoad, onSelectionChange) {
     this.id = id
     this.onRelocate = onRelocate
     this.onSectionLoad = onSectionLoad
     this.onSelectionChange = onSelectionChange
-    this.onTouchStart = onTouchStart
   }
 
   async getBook(id) {
@@ -125,7 +123,6 @@ export default class Reader {
   }
 
   private handleTouchStart = () => {
-    this.onTouchStart()
     this.clearSelection()
   }
 
