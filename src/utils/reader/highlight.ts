@@ -7,6 +7,9 @@ function init() {
 
 const parsers = {}
 const supportLangs = ['json', 'javascript']
+const queryMap = {
+  javascript: ['javascript', 'ecma'],
+}
 
 async function parse(code, lang) {
   await init()
@@ -22,8 +25,9 @@ async function parse(code, lang) {
   }
   const parser = parsers[lang]
   const tree = parser.parse(code)
-  const query = await import(`./ts-querys/${lang}.scm`)
-  const q = parser.language.query(query.default)
+  const queryFile = queryMap[lang] ? queryMap[lang] : [lang]
+  const query = await Promise.all(queryFile.map(f => import(`./ts-querys/${f}.scm`)))
+  const q = parser.language.query(query.map(_ => _.default).join('\n'))
   return q.matches(tree.rootNode)
 }
 

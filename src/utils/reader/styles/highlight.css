@@ -1,6 +1,9 @@
 pre {
   background: #2e3440;
 }
+code {
+  color: #2e3440;
+}
 pre code {
   color: #d8dee9;
 }
@@ -16,6 +19,7 @@ code .punctuation\.bracket,
 code .punctuation\.delimiter {
   color: #88c0d0;
 }
+code .keyword\.conditional,
 code .keyword\.repeat,
 code .keyword\.operator,
 code .keyword\.return,
