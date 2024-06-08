@@ -6,9 +6,10 @@ function init() {
 }
 
 const parsers = {}
-const supportLangs = ['json', 'javascript']
+const supportLangs = ['javascript', 'typescript', 'json', 'c', 'cpp', 'css', 'go', 'haskell', 'python', 'rust', 'tsx']
 const queryMap = {
   javascript: ['javascript', 'ecma'],
+  tsx: ['tsx', 'javascript', 'typescript', 'ecma']
 }
 
 async function parse(code, lang) {
@@ -31,8 +32,48 @@ async function parse(code, lang) {
   return q.matches(tree.rootNode)
 }
 
+const nodeTypeScoreMap = {
+  variable: 0.4,
+  ['type.builtin']: 1.5,
+  ['punctuation.bracket']: 0.2,
+  ['punctuation.delimiter']: 0.2,
+}
+
 function getScore(code, matches) {
-  return matches.length / code.length
+  let score = 0
+  let lastEnd = -1
+  matches.forEach(match => {
+    const start = match.captures[0].node.startIndex
+    const end = match.captures[0].node.endIndex
+    const name = match.captures[0].name
+    const properties = match.setProperties
+    if (start <= lastEnd) {
+      lastEnd = end
+      score -= 0.1
+      return
+    }
+    if (properties?.score) {
+      score += Number(properties.score)
+    } else {
+      score += nodeTypeScoreMap[name] || 1
+    }
+    lastEnd = end
+  })
+  return score / code.length
+}
+
+const replaceReg = /([&<>"'])/g
+const replaceMap = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    '\'': '&#39;'
+}
+function encodeHTML(source: string) {
+    return source === null ? '' : (source + '').replace(replaceReg, function (str, c) {
+        return replaceMap[c]
+    })
 }
 
 const cache = {}
@@ -50,9 +91,9 @@ function adjust(code, matches) {
       return // avoid duplicate matches for the same text
     }
     if (start > lastEnd) {
-      adjusted += code.substring(lastEnd, start)
+      adjusted += encodeHTML(code.substring(lastEnd, start))
     }
-    adjusted += `<span class="${name}">${text}</span>`
+    adjusted += `<span class="${name}">${encodeHTML(text)}</span>`
     lastEnd = end
   })
 
@@ -63,18 +104,29 @@ function adjust(code, matches) {
   return adjusted
 }
 
+const defaultLang = 'javascript'
+const langPattern = [
+  {name: 'python', pattern: /^>>>/},
+  {name: 'css', pattern: /^\s*[a-z]+(-[a-z]+)?: ?[^\n;]+;$/m},
+]
+
 export default async function(code, lang?) {
   if (cache[code]) {
     return cache[code]
   }
   if (!lang) {
-    const adjusted = await new Promise(async (res) => {
+    const guessLang = langPattern.find(_ => _.pattern.test(code))
+    let langs = supportLangs
+    if (guessLang) {
+      langs = [guessLang.name]
+    }
+    const result = await new Promise(async (res) => {
       let adjusted
       let maxScore = 0
       let matchLang
       let n = 0
-      for (let i = 0; i < supportLangs.length; i++) {
-        const lang = supportLangs[i]
+      for (let i = 0; i < langs.length; i++) {
+        const lang = langs[i]
         const matches = await parse(code, lang)
         const score = getScore(code, matches)
         if (score > maxScore) {
@@ -84,19 +136,19 @@ export default async function(code, lang?) {
           n ++
         }
         if (n > 2) {
-          res(adjusted)
+          res([matchLang, adjusted])
           return
         }
       }
-      res(adjusted)
+      res([matchLang, adjusted])
     })
-    if (adjusted) {
-      cache[code] = adjusted
-      return adjusted
+    if (result[0]) {
+      cache[code] = result
+      return result
     }
   }
-  const matches = await parse(code, 'javascript')
+  const matches = await parse(code, defaultLang)
   const adjusted = adjust(code, matches)
   cache[code] = adjusted
-  return adjusted
+  return [defaultLang, adjusted]
 }

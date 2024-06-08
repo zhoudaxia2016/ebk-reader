@@ -16,16 +16,16 @@
 (array
   (string) @string)
 
-[
+([
   ","
   ":"
-] @punctuation.delimiter
+] @punctuation.delimiter (#set! "score" 1))
 
-[
+([
   "["
   "]"
   "{"
   "}"
-] @punctuation.bracket
+] @punctuation.bracket (#set! "score" 1))
 
 (escape_sequence) @string.escape

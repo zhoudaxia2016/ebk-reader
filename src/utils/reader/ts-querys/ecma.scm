@@ -1,5 +1,3 @@
-(identifier) @variable
-
 (property_identifier) @variable.member
 
 (shorthand_property_identifier) @variable.member
@@ -11,11 +9,14 @@
     (object_pattern
       (shorthand_property_identifier_pattern))) @variable
 
-((identifier) @variable.builtin
+((identifier) @variable.builtin (#set! "score" 3)
   (#any-of? @variable.builtin "arguments" "module" "console" "window" "document"))
 
 ((identifier) @type.builtin
-  (#any-of? @type.builtin "Object" "Function" "Boolean" "Symbol" "Number" "Math" "Date" "String" "RegExp" "Map" "Set" "WeakMap" "WeakSet" "Promise" "Array" "Int8Array" "Uint8Array" "Uint8ClampedArray" "Int16Array" "Uint16Array" "Int32Array" "Uint32Array" "Float32Array" "Float64Array" "ArrayBuffer" "DataView" "Error" "EvalError" "InternalError" "RangeError" "ReferenceError" "SyntaxError" "TypeError" "URIError"))
+  (#any-of? @type.builtin "Object" "Function" "Boolean" "Symbol" "Number" "String" "Map" "Set" "Array" "Error" "EvalError" "InternalError" "RangeError" "ReferenceError" "SyntaxError" "TypeError" "URIError"))
+
+((identifier) @type.builtin (#set! "score" 3)
+  (#any-of? @type.builtin "Math" "Date" "RegExp" "WeakMap" "WeakSet" "Promise" "Int8Array" "Uint8Array" "Uint8ClampedArray" "Int16Array" "Uint16Array" "Int32Array" "Uint32Array" "Float32Array" "Float64Array" "ArrayBuffer" "DataView" "URIError"))
 
 ; Function and method definitions
 ;--------------------------------
@@ -90,14 +91,14 @@
         [
           (property_identifier)
           (private_property_identifier)
-        ] @function.method.call))
+        ] @function.method.call (#set! "score" 1.5)))
 
 ; Builtins
 ;---------
 ((identifier) @module.builtin
   (#eq? @module.builtin "Intl"))
 
-((identifier) @function.builtin
+((identifier) @function.builtin (#set! "score" 3)
   (#any-of? @function.builtin "eval" "isFinite" "isNaN" "parseFloat" "parseInt" "decodeURI" "decodeURIComponent" "encodeURI" "encodeURIComponent" "require"))
 
 ; Constructor

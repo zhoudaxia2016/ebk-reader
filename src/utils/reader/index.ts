@@ -102,10 +102,14 @@ export default class Reader {
   }
 
   private async initHl(dom) {
-    const adjusted = await highlight(dom.innerText)
+    const [lang, adjusted] = await highlight(dom.innerText)
     try {
       dom.innerHTML = adjusted
+      dom.classList.add('lang-' + lang)
     } catch (err) {
+      console.error('[initHl] failed:', err)
+      console.error('[initHl] adjusted', adjusted)
+      console.error('[initHl] lang', lang)
     }
   }
 
