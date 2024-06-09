@@ -14,7 +14,7 @@ class Translator {
   public init(host) {
     this.openai = new OpenAI({
       apiKey: '123456', // 随便填
-      baseURL: `http://${host}/v1`,
+      baseURL: `${window.location.protocol}//${host}/v1`,
       dangerouslyAllowBrowser: true,
     })
   }
