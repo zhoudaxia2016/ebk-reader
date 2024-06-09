@@ -11,6 +11,8 @@ import Search from './Search'
 import iddb from '~/storage/iddb'
 import Notes from './Notes'
 import {noteColors} from './config'
+import ContextMenu from './ContextMenu'
+import {INote, ISelection} from './ContextMenu/types'
 
 interface IProps {
   searchParams: any,
@@ -30,20 +32,9 @@ interface IState {
   fraction: number,
   pages?: number,
   page?: number,
-  selection?: {cfi: string, x: number, y: number, text: string},
+  selection?: ISelection,
   selectNote?: INote,
   btModal?: BT_MODAL | -1,
-}
-
-interface INote {
-  id: number,
-  bookId: number,
-  sectionIndex: number,
-  cfi: string,
-  date: {year: number, month: number, day: number},
-  text: string,
-  view?: string,
-  color?: string,
 }
 
 export default class Book extends React.Component<IProps, IState> {
@@ -55,7 +46,7 @@ export default class Book extends React.Component<IProps, IState> {
   private touchStartTime: number
   private reader: Reader
   private notes: INote[] = []
-  private refNoteInput = React.createRef<InputRef>()
+  private refContextMenu = React.createRef<ContextMenu>()
   public state: IState = {
     sections: [],
     sectionIndex: 0,
@@ -93,15 +84,6 @@ export default class Book extends React.Component<IProps, IState> {
     this.loadNotes()
   }
 
-  componentDidUpdate(_, prevState) {
-    if (!prevState.selectNote && this.state.selectNote) {
-      // TODO: 解决失焦问题，删除这段代码
-      setTimeout(() => {
-        this.refNoteInput.current?.focus()
-      }, 50)
-    }
-  }
-
   componentWillUnmount() {
     this.reader?.view.removeEventListener('touchstart', this.handleTouchStart)
     this.reader?.view.removeEventListener('touchend', this.handleTouchEnd)
@@ -128,10 +110,12 @@ export default class Book extends React.Component<IProps, IState> {
   private handleRelocate = ({fraction}) => {
     const {pages, page} = this.reader.view.renderer || {}
     this.setState({fraction, pages, page: page + 1})
+    this.refContextMenu.current.hideTranslateResult()
   }
 
   private handleTap = (e) => {
     const [value] = this.reader.hitTest(e.srcEvent)
+    this.refContextMenu.current?.hideTranslateResult()
     if (value) {
       const selectNote = this.notes.find(_ => _.cfi === value)
       this.setState({selectNote, fullReader: true})
@@ -254,7 +238,7 @@ export default class Book extends React.Component<IProps, IState> {
     this.loadNotes()
   }
 
-  private closeContextMenu = () => {
+  private clearSelection = () => {
     this.reader.clearSelection()
   }
 
@@ -266,9 +250,9 @@ export default class Book extends React.Component<IProps, IState> {
     this.loadNotes()
   }
 
-  private publishNote = () => {
+  private publishNote = (view: string) => {
     const {selectNote} = this.state
-    selectNote.view = this.refNoteInput.current.input.value
+    selectNote.view = view
     iddb.updateNote(selectNote)
     const i = this.notes.findIndex(_ => _.id === selectNote.id)
     this.notes[i] = selectNote
@@ -289,13 +273,6 @@ export default class Book extends React.Component<IProps, IState> {
     this.notes[i] = selectNote
     this.setState({selectNote: null})
     this.reader.addAnnotation(selectNote)
-  }
-
-  private renderColorOptions() {
-    const colors = noteColors.map(c => (
-      <div className="note-color-item" style={{background: c}} onClick={() => this.setNoteColor(c)}></div>
-    ))
-    return <div className="note-colors">{colors}</div>
   }
 
   render() {
@@ -362,30 +339,8 @@ export default class Book extends React.Component<IProps, IState> {
             <Button className="book-more-btn"><EllipsisOutlined/></Button>
           </Dropdown>
         }
-        {
-          selection &&
-          <div className="context-menu" style={{left: selection.x, top: selection.y}} onClick={this.closeContextMenu}>
-            <div className="context-menu-item" onClick={this.handleNote}>标记</div>
-          </div>
-        }
-        {
-          selectNote &&
-          <div className="note-modal">
-            <div className="note-modal-header">
-              <div className="note-modal-text">{selectNote.text}</div>
-              <div className="note-modal-btns">
-                <Button type="text" onClick={this.deleteNote}>删除</Button>
-              </div>
-            </div>
-            <Input ref={this.refNoteInput} defaultValue={selectNote.view} suffix={
-              <>
-                <Tooltip placement="top" title={this.renderColorOptions()}>
-                  <div className="note-color-btn" style={{background: selectNote.color}}></div>
-                </Tooltip>
-                <Button type="text" onClick={this.publishNote}><EnterOutlined/></Button>
-              </>}/>
-          </div>
-        }
+        <ContextMenu ref={this.refContextMenu} selection={selection} selectNote={selectNote} addNote={this.handleNote}
+          clearSelection={this.clearSelection} deleteNote={this.deleteNote} publishNote={this.publishNote} setNoteColor={this.setNoteColor}/>
       </div>
     )
   }
