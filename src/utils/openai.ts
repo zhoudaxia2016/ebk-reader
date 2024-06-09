@@ -1,4 +1,5 @@
 import OpenAI from 'openai'
+import {userInfoStorage} from '~/storage/localStorage'
 
 // 本地部署sakurallm 参考https://github.com/SakuraLLM/SakuraLLM
 class Translator {
@@ -40,6 +41,6 @@ class Translator {
   }
 }
 
-const translator = new Translator(process.env.REACT_APP_OPENAI_HOST)
+const translator = new Translator(userInfoStorage.get('openaiHost') || process.env.REACT_APP_OPENAI_HOST)
 
 export {translator}

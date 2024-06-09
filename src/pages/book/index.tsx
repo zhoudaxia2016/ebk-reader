@@ -1,7 +1,7 @@
 import './index.less'
 import React from 'react'
 import Reader, {handleLaunchWithFile} from '~/utils/reader'
-import {LeftOutlined, RightOutlined, HomeOutlined, EllipsisOutlined, SearchOutlined, BackwardOutlined, ForwardOutlined, EditOutlined, EnterOutlined} from '@ant-design/icons'
+import {LeftOutlined, RightOutlined, HomeOutlined, EllipsisOutlined, SearchOutlined, BackwardOutlined, ForwardOutlined, EditOutlined, EnterOutlined, SettingOutlined} from '@ant-design/icons'
 import {Button, Dropdown, Progress, Input, InputRef, Tooltip} from 'antd'
 import {EPUB} from '~/foliate-js/epub'
 import Dir from './Dir'
@@ -13,6 +13,7 @@ import Notes from './Notes'
 import {noteColors} from './config'
 import ContextMenu from './ContextMenu'
 import {INote, ISelection} from './ContextMenu/types'
+import Setting from './Setting'
 
 interface IProps {
   searchParams: any,
@@ -283,11 +284,17 @@ export default class Book extends React.Component<IProps, IState> {
     const menus = [
       {
         label: (
+          <Setting/>
+        ),
+        key: 0
+      },
+      {
+        label: (
           <Button type="text" disabled={!reader?.view?.history.canGoBack}>
             <BackwardOutlined onClick={this.backward}/>
           </Button>
         ),
-        key: 0
+        key: 1
       },
       {
         label: (
@@ -295,7 +302,7 @@ export default class Book extends React.Component<IProps, IState> {
             <ForwardOutlined onClick={this.forward}/>
           </Button>
         ),
-        key: 1
+        key: 2
       },
     ]
 
