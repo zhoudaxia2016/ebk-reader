@@ -169,13 +169,20 @@ export default class Reader {
       return
     }
     const range = s.getRangeAt(0)
-    const {x, y, width} = range.getBoundingClientRect()
+    let {x, y, width, bottom} = range.getBoundingClientRect()
     if (width < 1) {
       closeContextMenu()
       return
     }
     const cfi = this.view.getCFI(this.sectionIndex, range)
-    const selection = {x, y: y - this.view.renderer.start - 10, cfi, text: s.toString()}
+    const contextMenuHeight = 50
+    y = y - this.view.renderer.start
+    if (y < window.innerHeight / 2) {
+      y = bottom - this.view.renderer.start + contextMenuHeight + 10
+    } else {
+      y = y - 10
+    }
+    const selection = {x, y, cfi, text: s.toString()}
     this.onSelectionChange(selection)
   }
 

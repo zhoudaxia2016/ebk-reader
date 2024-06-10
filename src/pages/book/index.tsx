@@ -1,7 +1,7 @@
 import './index.less'
 import React from 'react'
 import Reader, {handleLaunchWithFile} from '~/utils/reader'
-import {LeftOutlined, RightOutlined, HomeOutlined, EllipsisOutlined, SearchOutlined, BackwardOutlined, ForwardOutlined, EditOutlined, EnterOutlined, SettingOutlined} from '@ant-design/icons'
+import {LeftOutlined, RightOutlined, HomeOutlined, EllipsisOutlined, SearchOutlined, BackwardOutlined, ForwardOutlined, EditOutlined} from '@ant-design/icons'
 import {Button, Dropdown, Progress, Input, InputRef, Tooltip} from 'antd'
 import {EPUB} from '~/foliate-js/epub'
 import Dir from './Dir'
@@ -40,7 +40,6 @@ interface IState {
 
 export default class Book extends React.Component<IProps, IState> {
   private refReaderContainer = React.createRef<HTMLDivElement>()
-  private book
   private id: number
   private hammer: Hammer
   private startTouch: any
