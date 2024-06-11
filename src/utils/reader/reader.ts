@@ -125,12 +125,22 @@ export const getBook = async file => {
   return book
 }
 
-export const mountBook = async (book, container) => {
+const horizontalModeStyle = `
+body {
+  writing-mode: horizontal-tb;
+  direction: ltr;
+}
+`
+
+export const mountBook = async (book, container, {horizontal}) => {
   const view = document.createElement('foliate-view') as IView
   container.append(view)
   await view.open(book)
   view.renderer.setAttribute('flow', 'scrolled')
-  const defaultCSS = await getCSS()
+  let defaultCSS = await getCSS()
+  if (horizontal) {
+    defaultCSS += horizontalModeStyle
+  }
   view.renderer.setStyles?.(defaultCSS)
   const title = book.metadata?.title ?? 'Untitled Book'
   document.title = title

@@ -1,7 +1,7 @@
 import React from 'react'
 import {SettingOutlined} from '@ant-design/icons'
-import {Button, Drawer, Form, Input, Select} from 'antd'
-import {userInfoStorage, bookUserInfoStorage} from '~/storage/localStorage'
+import {Button, Checkbox, Divider, Drawer, Form, Input, Select} from 'antd'
+import {userInfoStorage} from '~/storage/localStorage'
 import {translator} from '~/utils/openai'
 import {supportLangs} from '~/utils/reader/highlight'
 
@@ -15,6 +15,7 @@ interface IProps {
 interface IState {
   show?: boolean,
   openaiHost: string,
+  horizontal: boolean,
 }
 
 const formName = 'setting'
@@ -23,6 +24,7 @@ export default class Setting extends React.PureComponent<IProps, IState> {
 
   public state: IState = {
     openaiHost: userInfoStorage.get('openaiHost'),
+    horizontal: userInfoStorage.get('horizontal') === '1',
   }
 
   private open = () => {
@@ -33,8 +35,9 @@ export default class Setting extends React.PureComponent<IProps, IState> {
     this.setState({show: false})
   }
 
-  private handleFinish = ({openaiHost, codeBlockLang}) => {
+  private handleFinish = ({openaiHost, codeBlockLang, horizontal}) => {
     userInfoStorage.set('openaiHost', openaiHost)
+    userInfoStorage.set('horizontal', horizontal ? '1' : '0')
     const {onCodeBlockLangChange} = this.props
     onCodeBlockLangChange(codeBlockLang)
     translator.init(openaiHost)
@@ -43,15 +46,19 @@ export default class Setting extends React.PureComponent<IProps, IState> {
 
   render() {
     const {codeBlockLang} = this.props
-    const {show, openaiHost} = this.state
+    const {show, openaiHost, horizontal} = this.state
     return (
       <>
         <Button type="text" onClick={this.open}><SettingOutlined/></Button>
         <Drawer rootClassName="setting-container" title="阅读配置" open={show} placement="bottom" height="auto" closeIcon={null} onClose={this.close}>
-          <Form className="setting-form" name={formName} onFinish={this.handleFinish} initialValues={{openaiHost, codeBlockLang}}>
+          <Form className="setting-form" name={formName} onFinish={this.handleFinish} initialValues={{openaiHost, codeBlockLang, horizontal}}>
             <Form.Item name="openaiHost" label="openai-host">
               <Input autoFocus size="large" autoComplete="off"/>
             </Form.Item>
+            <Form.Item name="horizontal" valuePropName="checked">
+              <Checkbox>强制横排</Checkbox>
+            </Form.Item>
+            <Divider/>
             <Form.Item name="codeBlockLang" label="代码块默认语言（需要reload生效）">
               <Select size="large">
                 <Option value="">auto</Option>

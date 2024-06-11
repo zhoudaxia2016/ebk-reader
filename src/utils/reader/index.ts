@@ -1,6 +1,6 @@
 import {Overlayer} from '~/foliate-js/overlayer'
 import iddb from '~/storage/iddb'
-import {ObjectStorage} from '~/storage/localStorage'
+import {ObjectStorage, userInfoStorage} from '~/storage/localStorage'
 import {toArrayBuffer} from '../fileReader'
 import {getMd5, saveBooks} from '../utils'
 import {mountBook, getBook, IView} from './reader'
@@ -39,7 +39,7 @@ export default class Reader {
     this.bookUserInfo = new ObjectStorage({name: 'book-userinfo', id: this.id})
     const book: any = await this.getBook(this.id)
     dom.innerText = ''
-    const view: IView = await mountBook(book, dom)
+    const view: IView = await mountBook(book, dom, {horizontal: userInfoStorage.get('horizontal') === '1'})
     this.view = view
     this.book = book
     this.bindEvents()
