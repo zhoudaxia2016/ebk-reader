@@ -2,7 +2,7 @@ import './index.less'
 import React from 'react'
 import Reader, {handleLaunchWithFile} from '~/utils/reader'
 import {LeftOutlined, RightOutlined, HomeOutlined, EllipsisOutlined, SearchOutlined, BackwardOutlined, ForwardOutlined, EditOutlined} from '@ant-design/icons'
-import {Button, Dropdown, Progress, Input, InputRef, Tooltip} from 'antd'
+import {Button, Dropdown, Progress} from 'antd'
 import {EPUB} from '~/foliate-js/epub'
 import Dir from './Dir'
 import Hammer from 'hammerjs'
@@ -275,6 +275,10 @@ export default class Book extends React.Component<IProps, IState> {
     this.reader.addAnnotation(selectNote)
   }
 
+  private onCodeBlockLangChange = (codeBlockLang) => {
+    this.reader.bookUserInfo.set('codeBlockLang', codeBlockLang)
+  }
+
   render() {
     const {fullReader, toc, fraction, btModal, pages, page, selection, selectNote} = this.state
     const title = this.reader?.book?.metadata.title
@@ -283,7 +287,7 @@ export default class Book extends React.Component<IProps, IState> {
     const menus = [
       {
         label: (
-          <Setting/>
+          <Setting codeBlockLang={this.reader?.bookUserInfo.get('codeBlockLang')} onCodeBlockLangChange={this.onCodeBlockLangChange}/>
         ),
         key: 0
       },

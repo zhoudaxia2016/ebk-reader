@@ -102,7 +102,8 @@ export default class Reader {
   }
 
   private async initHl(dom) {
-    const [lang, adjusted] = await highlight(dom.innerText)
+    const codeBlockLang = this.bookUserInfo.get('codeBlockLang')
+    const [lang, adjusted] = await highlight(dom.innerText, codeBlockLang)
     try {
       dom.innerHTML = adjusted
       dom.classList.add('lang-' + lang)

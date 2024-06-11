@@ -6,7 +6,7 @@ function init() {
 }
 
 const parsers = {}
-const supportLangs = ['javascript', 'typescript', 'json', 'c', 'cpp', 'css', 'go', 'haskell', 'python', 'rust', 'tsx']
+export const supportLangs = ['javascript', 'typescript', 'json', 'c', 'cpp', 'css', 'go', 'haskell', 'python', 'rust', 'tsx']
 const queryMap = {
   javascript: ['javascript', 'ecma'],
   tsx: ['tsx', 'javascript', 'typescript', 'ecma']
@@ -147,8 +147,9 @@ export default async function(code, lang?) {
       return result
     }
   }
-  const matches = await parse(code, defaultLang)
+  lang = lang || defaultLang
+  const matches = await parse(code, lang)
   const adjusted = adjust(code, matches)
   cache[code] = adjusted
-  return [defaultLang, adjusted]
+  return [lang, adjusted]
 }
