@@ -59,6 +59,15 @@ export default class ContextMenu extends React.PureComponent<IProps, IState> {
     return <div className="note-colors">{colors}</div>
   }
 
+  private handleCopy = () => {
+    const {text} = this.props.selection
+    navigator.clipboard.writeText(text).then(() => {
+      notification.open({message: '复制成功'})
+    }).catch(err => {
+      notification.open({message: '复制失败：' + err})
+    })
+  }
+
   public hideTranslateResult() {
     this.setState({translateResult: ''})
   }
@@ -77,6 +86,7 @@ export default class ContextMenu extends React.PureComponent<IProps, IState> {
           <div className="context-menu" style={{left: selection.x, top: selection.y}} onClick={clearSelection}>
             <div className="context-menu-item" onClick={addNote}>标记</div>
             <div className="context-menu-item" onClick={this.handleTranslate}>翻译</div>
+            <div className="context-menu-item" onClick={this.handleCopy}>复制</div>
           </div>
         }
         {
