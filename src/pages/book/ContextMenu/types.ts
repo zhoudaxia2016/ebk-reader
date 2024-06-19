@@ -1,7 +1,11 @@
 export interface ISelection {
   cfi: string,
-  x: number,
-  y: number,
+  pos: {
+    left?: number,
+    right?: number,
+    top?: number,
+    bottom?: number,
+  }
   text: string
 }
 

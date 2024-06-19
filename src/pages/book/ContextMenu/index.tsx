@@ -76,6 +76,22 @@ export default class ContextMenu extends React.PureComponent<IProps, IState> {
     return this.refNoteInput.current.input
   }
 
+  private getStyle() {
+    const {selection: {pos}} = this.props
+    const style: React.CSSProperties = {}
+    if (pos.left) {
+      style.left = pos.left + 'px'
+    } else {
+      style.right = pos.right + 'px'
+    }
+    if (pos.top) {
+      style.top = pos.top + 'px'
+    } else {
+      style.bottom = pos.bottom + 'px'
+    }
+    return style
+  }
+
   render() {
     const {selection, selectNote, addNote, deleteNote, clearSelection} = this.props
     const {translateResult} = this.state
@@ -83,7 +99,7 @@ export default class ContextMenu extends React.PureComponent<IProps, IState> {
       <>
         {
           selection &&
-          <div className="context-menu" style={{left: selection.x, top: selection.y}} onClick={clearSelection}>
+          <div className="context-menu" style={this.getStyle()} onClick={clearSelection}>
             <div className="context-menu-item" onClick={addNote}>标记</div>
             <div className="context-menu-item" onClick={this.handleTranslate}>翻译</div>
             <div className="context-menu-item" onClick={this.handleCopy}>复制</div>

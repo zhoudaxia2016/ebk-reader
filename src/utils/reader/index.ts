@@ -6,6 +6,13 @@ import {getMd5, saveBooks} from '../utils'
 import {mountBook, getBook, IView} from './reader'
 import highlight from './highlight'
 
+interface IPos {
+  left?: number,
+  right?: number,
+  top?: number,
+  bottom?: number,
+}
+
 export default class Reader {
   public bookUserInfo: ObjectStorage
   public id: number
@@ -18,7 +25,7 @@ export default class Reader {
   private doc: Document
   private onRelocate: (params: {fraction: number}) => void
   private onSectionLoad: (params: {index: number, doc: HTMLDocument}) => void
-  private onSelectionChange: (selection: {x: number, y: number, cfi: string}) => void
+  private onSelectionChange: (selection: {pos: IPos, cfi: string}) => void
   private observer: IntersectionObserver
 
   constructor(id, onRelocate, onSectionLoad, onSelectionChange) {
@@ -170,20 +177,28 @@ export default class Reader {
       return
     }
     const range = s.getRangeAt(0)
-    let {x, y, width, bottom} = range.getBoundingClientRect()
+    let {width, top, bottom, left, right} = range.getBoundingClientRect()
     if (width < 1) {
       closeContextMenu()
       return
     }
     const cfi = this.view.getCFI(this.sectionIndex, range)
-    const contextMenuHeight = 50
-    y = y - this.view.renderer.start
-    if (y < window.innerHeight / 2) {
-      y = bottom - this.view.renderer.start + contextMenuHeight + 10
+    const pos: IPos = {}
+    const {innerHeight} = window
+    const scrollTop = this.view.renderer.start
+    const headerHeight = 48
+    if (top - scrollTop < innerHeight / 2) {
+      pos.top = bottom - scrollTop + headerHeight
     } else {
-      y = y - 10
+      pos.bottom = innerHeight - (top - scrollTop) - headerHeight
     }
-    const selection = {x, y, cfi, text: s.toString()}
+    const clientWidth = this.doc.documentElement.clientWidth
+    if (left > clientWidth / 2) {
+      pos.right = clientWidth - right
+    } else {
+      pos.left = left
+    }
+    const selection = {pos, cfi, text: s.toString()}
     this.onSelectionChange(selection)
   }
 
