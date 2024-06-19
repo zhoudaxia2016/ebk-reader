@@ -14,6 +14,7 @@ interface IProps {
   deleteNote: () => void,
   setNoteColor: (color: string) => void,
   publishNote: (view: string) => void,
+  onSearch: (value: string) => void,
 }
 
 interface IState {
@@ -92,6 +93,11 @@ export default class ContextMenu extends React.PureComponent<IProps, IState> {
     return style
   }
 
+  private handleSearch = () => {
+    const {selection: {text}, onSearch} = this.props
+    onSearch(text)
+  }
+
   render() {
     const {selection, selectNote, addNote, deleteNote, clearSelection} = this.props
     const {translateResult} = this.state
@@ -103,6 +109,7 @@ export default class ContextMenu extends React.PureComponent<IProps, IState> {
             <div className="context-menu-item" onClick={addNote}>标记</div>
             <div className="context-menu-item" onClick={this.handleTranslate}>翻译</div>
             <div className="context-menu-item" onClick={this.handleCopy}>复制</div>
+            <div className="context-menu-item" onClick={this.handleSearch}>搜索</div>
           </div>
         }
         {

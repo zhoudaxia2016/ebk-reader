@@ -101,6 +101,10 @@ export default class Search extends React.PureComponent<IProps, IState> {
     )
   }
 
+  public search(value: string) {
+    this.handleChange({target: {value}})
+  }
+
   render() {
     const {showProgress, progress} = this.state
     return (

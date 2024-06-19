@@ -47,6 +47,7 @@ export default class Book extends React.Component<IProps, IState> {
   private reader: Reader
   private notes: INote[] = []
   private refContextMenu = React.createRef<ContextMenu>()
+  private refSearch = React.createRef<Search>()
   public state: IState = {
     sections: [],
     sectionIndex: 0,
@@ -279,6 +280,12 @@ export default class Book extends React.Component<IProps, IState> {
     this.reader.bookUserInfo.set('codeBlockLang', codeBlockLang)
   }
 
+  private handleSearch = (value) => {
+    this.setState({btModal: BT_MODAL.search}, () => {
+      this.refSearch.current?.search(value)
+    })
+  }
+
   render() {
     const {fullReader, toc, fraction, btModal, pages, page, selection, selectNote} = this.state
     const title = this.reader?.book?.metadata.title
@@ -326,7 +333,7 @@ export default class Book extends React.Component<IProps, IState> {
           !fullReader &&
           <div className="footer">
             <div className="footer-content">
-              {showSearch && <Search view={reader?.view}/>}
+              {showSearch && <Search ref={this.refSearch} view={reader?.view}/>}
               {
                 showNotes &&
                 <Notes notes={this.notes} goto={this.goto}/>
@@ -350,7 +357,8 @@ export default class Book extends React.Component<IProps, IState> {
           </Dropdown>
         }
         <ContextMenu ref={this.refContextMenu} selection={selection} selectNote={selectNote} addNote={this.handleNote}
-          clearSelection={this.clearSelection} deleteNote={this.deleteNote} publishNote={this.publishNote} setNoteColor={this.setNoteColor}/>
+          clearSelection={this.clearSelection} deleteNote={this.deleteNote} publishNote={this.publishNote} setNoteColor={this.setNoteColor}
+          onSearch={this.handleSearch}/>
       </div>
     )
   }
