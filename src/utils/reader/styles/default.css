@@ -8,7 +8,7 @@ html {
     color: lightblue;
   }
 }
-a, p, li, blockquote, dd, div {
+a, p, li, blockquote, dd, div, font {
   text-align: 'justify';
   -webkit-hyphens: 'auto';
   hyphens: 'auto';
