@@ -1,6 +1,6 @@
 import React, {useCallback, useMemo, useState} from 'react'
 import {UnorderedListOutlined} from '@ant-design/icons'
-import {Button, Collapse, Drawer} from 'antd'
+import {Button, Collapse, Drawer, CollapseProps} from 'antd'
 
 export default function Dir({toc, goto, title}) {
   const [open, setOpen] = useState(false)
@@ -17,7 +17,17 @@ export default function Dir({toc, goto, title}) {
       key: s.id,
       showArrow: !!s.subitems,
       children: s.subitems
-        ? s.subitems.map(item => (<div className="dir-section" key={item.id} onClick={() => handleClick(item.href)}>{item.label}</div>))
+        ? s.subitems.map(item => (
+          <>
+            <div className="dir-section" key={item.id} onClick={() => handleClick(item.href)}>
+              {item.label}
+            </div>
+            {
+              item.subitems &&
+              <div>{item.subitems.map(_ => <div key={_.id} className="dir-section-subitem" onClick={() => handleClick(_.href)}>{_.label}</div>)}</div>
+            }
+          </>
+        ))
         : null
     }))
   }, [toc])
