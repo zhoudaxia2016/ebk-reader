@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/ebk-reader/static/css/main.b112c001.css",
-    "main.js": "/ebk-reader/static/js/main.dcbf5b33.js",
+    "main.css": "/ebk-reader/static/css/main.c8e51268.css",
+    "main.js": "/ebk-reader/static/js/main.38e1a952.js",
     "static/js/985.78f54bfd.chunk.js": "/ebk-reader/static/js/985.78f54bfd.chunk.js",
     "static/js/525.9942bc5d.chunk.js": "/ebk-reader/static/js/525.9942bc5d.chunk.js",
     "static/js/418.2b2cd4f7.chunk.js": "/ebk-reader/static/js/418.2b2cd4f7.chunk.js",
@@ -51,8 +51,8 @@
     "static/media/default-cover.svg": "/ebk-reader/static/media/default-cover.5364e1266a2832141f85a9727e70dea7.svg",
     "static/media/tree-sitter-json.wasm": "/ebk-reader/static/media/tree-sitter-json.ad5e257fb0898566f594.wasm",
     "index.html": "/ebk-reader/index.html",
-    "main.b112c001.css.map": "/ebk-reader/static/css/main.b112c001.css.map",
-    "main.dcbf5b33.js.map": "/ebk-reader/static/js/main.dcbf5b33.js.map",
+    "main.c8e51268.css.map": "/ebk-reader/static/css/main.c8e51268.css.map",
+    "main.38e1a952.js.map": "/ebk-reader/static/js/main.38e1a952.js.map",
     "985.78f54bfd.chunk.js.map": "/ebk-reader/static/js/985.78f54bfd.chunk.js.map",
     "525.9942bc5d.chunk.js.map": "/ebk-reader/static/js/525.9942bc5d.chunk.js.map",
     "418.2b2cd4f7.chunk.js.map": "/ebk-reader/static/js/418.2b2cd4f7.chunk.js.map",
@@ -66,7 +66,7 @@
     "966.bfd7c451.chunk.js.map": "/ebk-reader/static/js/966.bfd7c451.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.b112c001.css",
-    "static/js/main.dcbf5b33.js"
+    "static/css/main.c8e51268.css",
+    "static/js/main.38e1a952.js"
   ]
 }
