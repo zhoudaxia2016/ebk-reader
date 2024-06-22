@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react'
+import React, {useCallback, useEffect, useMemo, useRef, useState, Fragment} from 'react'
 import {UnorderedListOutlined} from '@ant-design/icons'
 import {Button, Collapse, Drawer} from 'antd'
 
@@ -46,7 +46,7 @@ export default function Dir({toc, goto, title, getCurrentChapter}) {
       showArrow: !!s.subitems,
       children: s.subitems
         ? s.subitems.map(item => (
-          <>
+          <Fragment key={item.id}>
             <DirItem className="dir-section" key={item.id} info={item} activeId={activeId} onClick={handleClick}>
               {item.label}
             </DirItem>
@@ -54,7 +54,7 @@ export default function Dir({toc, goto, title, getCurrentChapter}) {
               item.subitems &&
               <div>{item.subitems.map(_ => <DirItem key={_.id} className="dir-section-subitem" activeId={activeId} info={_} onClick={handleClick}>{_.label}</DirItem>)}</div>
             }
-          </>
+          </Fragment>
         ))
         : null
     }))
