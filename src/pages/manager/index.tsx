@@ -11,6 +11,7 @@ import {useNavigate} from 'react-router-dom'
 import ProgressModal from '~/components/ProgressModal'
 import ShelfForm from './BookCard/ShelfForm'
 import ShelfMenu from './ShelfMenu'
+import {saveAs} from 'file-saver'
 
 function Manager() {
   const [books, setBooks] = useState<any[]>([])
@@ -38,7 +39,7 @@ function Manager() {
     refMd5Set.current = new Set(books.map(_ => _.md5))
   }
 
-  const handleClickImport = useCallback((e: Event) => {
+  const handleClickImport = useCallback((e: any) => {
     refFileInput.current?.click()
     e.stopPropagation()
   }, [])
@@ -203,6 +204,18 @@ function Manager() {
     setShelfs(shelfStorage.getAll())
   }
 
+  const handleExportFile = async () => {
+    await Promise.all(
+      Object.keys(selectedBooks).map(async (id) => {
+        const content = await iddb.getBookData(Number(id))
+        const info = await iddb.getBookInfo(Number(id))
+        const file = new File([content], info.name, {type: info.type})
+        saveAs(file)
+      })
+    )
+    setSelectBooks({})
+  }
+
   const groups = [
     {label: '全部', value: ''},
     ...shelfs.map(_ => ({label: _.name, value: _.id}))
@@ -227,6 +240,7 @@ function Manager() {
           <div className="manager-operations">
             <Button type="text" onClick={handleBatchDelete}>删除</Button>
             <ShelfForm shelfs={shelfs} onFinish={handlePutShelf}/>
+            <Button type="text" onClick={handleExportFile}>导出文件</Button>
           </div>
         }
         <div className="manager-books">
