@@ -286,6 +286,10 @@ export default class Book extends React.Component<IProps, IState> {
     })
   }
 
+  private getCurrentChapter = () => {
+    return this.reader.getCurrentChapter()
+  }
+
   render() {
     const {fullReader, toc, fraction, btModal, pages, page, selection, selectNote} = this.state
     const title = this.reader?.book?.metadata.title
@@ -340,7 +344,7 @@ export default class Book extends React.Component<IProps, IState> {
               }
             </div>
             <div className="footer-btns">
-              <Dir toc={toc} goto={this.goto} title={title}/>
+              <Dir toc={toc} goto={this.goto} title={title} getCurrentChapter={this.getCurrentChapter}/>
               <Button className="search" type="text" size="large" icon={<SearchOutlined/>} onClick={this.toggleSearch}></Button>
               <Button type="text" size="large" icon={<EditOutlined />} onClick={this.toggleShowNotes}></Button>
               <Progress className="reader-progress" type="circle" size="small" percent={Math.round(fraction * 100)}

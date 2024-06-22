@@ -27,6 +27,7 @@ export default class Reader {
   private onSectionLoad: (params: {index: number, doc: HTMLDocument}) => void
   private onSelectionChange: (selection: {pos: IPos, cfi: string}) => void
   private observer: IntersectionObserver
+  private flatToc = []
 
   constructor(id, onRelocate, onSectionLoad, onSelectionChange) {
     this.id = id
@@ -50,6 +51,73 @@ export default class Reader {
     this.view = view
     this.book = book
     this.bindEvents()
+    this.initToc()
+  }
+
+  private initToc() {
+    const {sections} = this.book
+    if (!this.flatToc) {
+      return
+    }
+    const toc = []
+    const flatFunc = (item, parent?) => {
+      item = {parent, ...item}
+      toc.push(item)
+      if (item.subitems) {
+        for (let i = 0; i < item.subitems.length; i++) {
+          flatFunc(item.subitems[i], item)
+        }
+      }
+    }
+    for (let i = 0; i < this.book.toc.length; i++) {
+      flatFunc(this.book.toc[i])
+    }
+    let sectionIndex = 0
+    toc.forEach((item) => {
+      const [href] = this.book.splitTOCHref(item.href)
+      while(sectionIndex < sections.length) {
+        if (sections[sectionIndex].id === href) {
+          item.sectionIndex = sectionIndex
+          return
+        } else {
+          sectionIndex ++
+        }
+      }
+    })
+    this.flatToc = toc
+  }
+
+  public getCurrentChapter() {
+    let i = this.flatToc.length - 1
+    while(i > -1) {
+      if (this.flatToc[i].sectionIndex <= this.sectionIndex) {
+        const tocIndex = this.flatToc[i].sectionIndex
+        let j = i - 1
+        const result = [this.flatToc[i]]
+        while (j > -1) {
+          if (this.flatToc[j].sectionIndex !== tocIndex) {
+            break
+          }
+          result.push(this.flatToc[j])
+          j --
+        }
+        if (result.length === 1) {
+          return result[0]
+        }
+        // 显示一定内容(100px)才算打开了这一章节
+        const visibleTop = window.innerHeight + this.view.renderer.start - 100
+        for (let i = result.reverse().length - 1; i > -1; i--) {
+          const [_, id] = this.book.splitTOCHref(result[i].href)
+          const dom = this.doc.getElementById(id)
+          if (dom.offsetTop < visibleTop) {
+            return result[i]
+          }
+        }
+        return this.flatToc[i]
+      }
+      i --
+    }
+    return this.flatToc[0]
   }
 
   private bindEvents() {

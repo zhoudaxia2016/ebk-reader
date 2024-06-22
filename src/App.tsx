@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useEffect} from 'react'
 import './App.less'
 import {Routes, Route} from "react-router-dom"
 import Manager from './pages/manager'
@@ -8,9 +8,8 @@ import Palette from './config/color'
 import {useSearchParams} from 'react-router-dom'
 import {useNavigate} from 'react-router-dom'
 
-const cssVars = Object.keys(Palette).reduce((vars, key) => {
-  vars[`--${key}`] = Palette[key]
-  return vars
+Object.keys(Palette).forEach(key => {
+  document.body.style.setProperty(`--${key}`, Palette[key])
 }, {})
 
 function App() {
@@ -35,7 +34,7 @@ function App() {
         },
       }}
     >
-      <div className="App" style={cssVars}>
+      <div className="App">
         <Routes>
           <Route path="/" element={<Manager/>}/>
           <Route path="/book" element={<Book searchParams={searchParams} navigate={navigate}/>}/>
