@@ -53,10 +53,14 @@
 }
 
 .reader-progress {
-  .ant-progress-inner {
-    width: 40px !important;
-    height: 40px !important;
-    font-size: 12px !important;
+  display: flex;
+  align-items: center;
+  padding-top: 10px;
+  height: 30px;
+  .reader-progress-text {
+    margin-left: 10px;
+    font-size: 14px;
+    color: var(--fg3);
   }
 }
 
@@ -127,4 +131,5 @@
 
 .book-more-btn {
   .float-btn-br();
+  bottom: 100px;
 }
