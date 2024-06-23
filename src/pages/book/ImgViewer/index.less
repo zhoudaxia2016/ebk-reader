@@ -1,0 +1,46 @@
+.img-viewer {
+  &.ant-modal {
+    margin: 0;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    top: 0;
+    padding-bottom: 0;
+    height: 100vh;
+    .ant-modal-content {
+      height: 100vh;
+      padding: 20px 0;
+      box-sizing: border-box;
+      border-radius: 0;
+    }
+  }
+  .close-btn {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+  }
+  img {
+    width: 100vw;
+    height: calc(100vh - 40px);
+    object-fit: contain;
+  }
+  .slick-dots {
+    button {
+      background: var(--fg3) !important;
+    }
+  }
+  .slick-active {
+    button {
+      background: var(--fg2) !important;
+    }
+  }
+  .img-viewer-item {
+    position: relative;
+  }
+  .img-viewer-jump {
+    position: absolute;
+    left: 50%;
+    bottom: 40px;
+    color: var(--bg2);
+    transform: translateX(-50%);
+  }
+}

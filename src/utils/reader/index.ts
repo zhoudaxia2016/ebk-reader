@@ -305,6 +305,10 @@ export default class Reader {
     const {overlayer} = this.getOverlayer()
     return overlayer.hitTest(e)
   }
+
+  public getImgs() {
+    return Array.from(this.doc.getElementsByTagName('img'))
+  }
 }
 
 export {mountBook, getBook}

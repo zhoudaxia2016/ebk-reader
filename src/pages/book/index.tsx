@@ -14,6 +14,7 @@ import {noteColors} from './config'
 import ContextMenu from './ContextMenu'
 import {INote, ISelection} from './ContextMenu/types'
 import Setting from './Setting'
+import ImgViewer from './ImgViewer'
 
 interface IProps {
   searchParams: any,
@@ -290,6 +291,14 @@ export default class Book extends React.Component<IProps, IState> {
     return this.reader.getCurrentChapter()
   }
 
+  private getImgs = () => {
+    return this.reader.getImgs()
+  }
+
+  private setFullReader = () => {
+    this.setState({fullReader: true})
+  }
+
   render() {
     const {fullReader, toc, fraction, btModal, pages, page, selection, selectNote} = this.state
     const title = this.reader?.book?.metadata.title
@@ -317,6 +326,10 @@ export default class Book extends React.Component<IProps, IState> {
           </Button>
         ),
         key: 2
+      },
+      {
+        label: <ImgViewer getImgs={this.getImgs} onClose={this.setFullReader}/>,
+        key: 3
       },
     ]
 
