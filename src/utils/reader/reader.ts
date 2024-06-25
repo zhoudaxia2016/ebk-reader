@@ -135,6 +135,10 @@ body {
 export const mountBook = async (book, container, {horizontal}) => {
   const view = document.createElement('foliate-view') as IView
   container.append(view)
+  // 强制滚动视图，#24
+  if (book.rendition.layout) {
+    book.rendition.layout = ''
+  }
   await view.open(book)
   view.renderer.setAttribute('flow', 'scrolled')
   let defaultCSS = await getCSS()
