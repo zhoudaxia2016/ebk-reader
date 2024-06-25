@@ -56,7 +56,7 @@ export default class Reader {
 
   private initToc() {
     const {sections} = this.book
-    if (!this.flatToc) {
+    if (!this.book.toc) {
       return
     }
     const toc = []
